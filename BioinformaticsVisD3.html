@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+    <script src="http://d3js.org/queue.v1.min.js"></script>
+    <style>
+      path {
+        fill: none;
+      }   
+      
+      .axis path, .axis line{
+        stroke: black;
+      }
+      .axis .label {
+        font-size: 12pt;
+      }
+      
+      rect {
+        stroke-width: 1px;
+      }
+      
+      .HeatMap {
+        stroke: none;
+      }
+      
+      .time_axis {
+        font: 12px sans-serif;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+      }
+      
+      .time_axis .domain {
+        fill: none;
+        stroke: #000;
+        stroke-opacity: .3;
+        stroke-width: 10px;
+        stroke-linecap: round;
+      }
+      
+      .time_axis .halo {
+        fill: none;
+        stroke: #ddd;
+        stroke-width: 8px;
+        stroke-linecap: round;
+      }
+      
+      .slider .handle {
+        stroke: #000;
+        stroke-opacity: .5;
+        stroke-width: 1.25px;
+        cursor: crosshair;
+      }
+    </style>  
+  </head>
+  <body>
+    <script>      
+      var outerWidth = 1580;
+      var outerHeight = 760;
+      var margin = 20;
+      
+      var protein_type = 3;
+      var gene_type = 5;
+      var TimeStep = 21;
+      var currentTime = 10;
+               
+      var svg = d3.select("body").append("svg")
+            .attr("width", outerWidth)
+            .attr("height", outerHeight);
+     
+      // draw boundary of the entire view
+      var entire_view = svg.append("rect")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("width", outerWidth)
+            .attr("height", outerHeight)
+            .attr("fill", "none")
+            .attr("stroke", "black");
+      
+      /************************************************************************************/ 
+      // control panel
+      var show_projectionOneD = true;
+      var show_projectionTwoD = false;
+      var show_projectionTwoD_Pab = false;
+      var show_projectionTwoD_Pac = false;
+      var show_projectionTwoD_Pbc = false;
+      var show_projectionTwoD_time = false;
+      var show_projectionTwoD_3rdP = false;
+      var show_projectionThreeD = false;
+      var show_peaks = false;
+      var show_detailTwoD = false;
+      
+      var controlPanel_width = (outerWidth - margin*3) / 6;
+      var controlPanel_height = outerHeight - margin*2;
+      var controlPanel = svg.append("g").attr("transform", "translate(" + margin + "," + margin + ")");
+      var controlPanel_view = controlPanel.append("rect")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("width", controlPanel_width)
+            .attr("height", controlPanel_height)
+            .attr("fill", "none")
+            .attr("stroke", "black");      
+      
+      var button1_text = controlPanel.append("text")
+            .style("text-anchor", "left")
+            .attr("transform", "translate(" + 40 + "," + 25 + ")")
+            .attr("font-size", "14pt")
+            .text("1D Projecions");
+      
+      var button2_text = controlPanel.append("text")
+            .style("text-anchor", "left")
+            .attr("transform", "translate(" + 40 + "," + (25+25) + ")")
+            .attr("font-size", "14pt")
+            .text("2D Projecions");      
+      var button2_ab_text = controlPanel.append("text")
+            .style("text-anchor", "left")
+            .attr("transform", "translate(" + (40+27) + "," + (25+25*2) + ")")
+            .attr("font-size", "14pt")
+            .text("Protein A vs. B");
+      var button2_ac_text = controlPanel.append("text")
+            .style("text-anchor", "left")
+            .attr("transform", "translate(" + (40+27) + "," + (25+25*3) + ")")
+            .attr("font-size", "14pt")
+            .text("Protein A vs. C");            
+      var button2_bc_text = controlPanel.append("text")
+            .style("text-anchor", "left")
+            .attr("transform", "translate(" + (40+27) + "," + (25+25*4) + ")")
+            .attr("font-size", "14pt")
+            .text("Protein B vs. C");    
+      
+      var button2_time_text = controlPanel.append("text")
+            .style("text-anchor", "left")
+            .attr("transform", "translate(" + (40+27) + "," + (25+25*5) + ")")
+            .attr("font-size", "14pt")
+            .text("Show Time Curves");             
+      var button2_3rdP_text = controlPanel.append("text")
+            .style("text-anchor", "left")
+            .attr("transform", "translate(" + (40+27) + "," + (25+25*6) + ")")
+            .attr("font-size", "14pt")
+            .text("Show the 3rd Protein");
+                  
+      var button3_text = controlPanel.append("text")
+            .style("text-anchor", "left")
+            .attr("transform", "translate(" + 40 + "," + (25+25*7) + ")")
+            .attr("font-size", "14pt")
+            .text("3D Projecion");  
+      
+      var buttonPeak_text = controlPanel.append("text")
+            .style("text-anchor", "left")
+            .attr("transform", "translate(" + 40 + "," + (25+25*9) + ")")
+            .attr("font-size", "14pt")
+            .text("Show Peaks"); 
+             
+      /************************************************************************************/      
+      // main view
+      var main_width = (outerWidth - margin*3) * 5 / 6;
+      var main_height =  outerHeight - margin*2;
+      var main = svg.append("g")
+            .attr("transform", "translate(" + (controlPanel_width + margin*2) + "," + margin + ")");
+      var main_view = main.append("rect")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("width", main_width)
+            .attr("height", main_height)
+            .attr("fill", "none")
+            .attr("stroke", "black");
+      
+      // group all the objects in the main view
+      var shiftX = 50;
+      var shiftY = 25;
+      var projectionOneD = main.append("g")
+            .attr("transform", "translate(" + shiftX + "," + shiftY + ")");                  
+      var projectionTwoD = main.append("g")
+            .attr("transform", "translate(" + shiftX + "," + shiftY*2 + ")"); 
+            
+      /************************************************************************************/       
+      // 1D projection - line graphs
+      var lineGraphWidth = main_width * 3 / 5;
+      var lineGraphHeight = main_height / 2;
+      var xAxisLabelText = "Number of Proteins";
+      var yAxisLabelText = "Probability";            
+      var xScale = d3.scale.linear().range([0, lineGraphWidth]);
+      var yScale = d3.scale.linear().range([lineGraphHeight, 0]);
+      
+      // draw x/y-axis
+      function drawAxis(xMax, yMax) {
+        xScale.domain([0, xMax]);
+        yScale.domain([0, yMax]);
+        
+        var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+        var yAxis = d3.svg.axis().scale(yScale).orient("left");
+      
+        var xAxisG = projectionOneD.append("g")
+              .attr("transform", "translate(0," + lineGraphHeight + ")")
+              .attr("class", "x axis");
+        var yAxisG = projectionOneD.append("g")
+              .attr("class", "y axis");
+            
+        xAxisG.call(xAxis);
+        yAxisG.call(yAxis);
+        
+        var xAxisLabel = xAxisG.append("text")
+            .style("text-anchor", "middle")
+            .attr("transform", "translate(" + (lineGraphWidth/2) + "," + shiftY*2 + ")")
+            .attr("class", "label")
+            .text(xAxisLabelText);
+            
+        var yAxisLabel = yAxisG.append("text")
+            .style("text-anchor", "middle")
+            .attr("transform", "translate(" + 0 + "," + (-5) + ")")
+            .attr("class", "label")
+            .text(yAxisLabelText);
+            
+        var legend = projectionOneD.append("g");
+        legend.append("line")
+              .attr("x1", lineGraphWidth - shiftX*2.5)
+              .attr("y1", shiftY)
+              .attr("x2", lineGraphWidth - shiftX*1.5)
+              .attr("y2", shiftY)
+              .attr("stroke", d3.hsl(5, 0.9, 0.55));
+        legend.append("text")
+              .style("text-anchor", "left")
+              .attr("transform", "translate(" + (lineGraphWidth - shiftX*1.5 +5) + "," + shiftY + ")")
+              .attr("font-size", "12pt")
+              .attr("fill", d3.hsl(5, 0.9, 0.55))
+              .text("Protein A"); 
+        
+        legend.append("line")
+              .attr("x1", lineGraphWidth - shiftX*2.5)
+              .attr("y1", shiftY*2)
+              .attr("x2", lineGraphWidth - shiftX*1.5)
+              .attr("y2", shiftY*2)
+              .attr("stroke", d3.hsl(105, 0.9, 0.55));
+        legend.append("text")
+              .style("text-anchor", "left")
+              .attr("transform", "translate(" + (lineGraphWidth - shiftX*1.5 +5) + "," + shiftY*2 + ")")
+              .attr("font-size", "12pt")
+              .attr("fill", d3.hsl(105, 0.9, 0.55))
+              .text("Protein B");
+              
+        legend.append("line")
+              .attr("x1", lineGraphWidth - shiftX*2.5)
+              .attr("y1", shiftY*3)
+              .attr("x2", lineGraphWidth - shiftX*1.5)
+              .attr("y2", shiftY*3)
+              .attr("stroke", d3.hsl(225, 0.9, 0.55));       
+        legend.append("text")
+              .style("text-anchor", "left")
+              .attr("transform", "translate(" + (lineGraphWidth - shiftX*1.5 +5) + "," + shiftY*3 + ")")
+              .attr("font-size", "12pt")
+              .attr("fill", d3.hsl(225, 0.9, 0.55))
+              .text("Protein C");
+      }
+      
+      // draw line plots                                                   
+      function drawLineGraph(data, xColumn, yColumn, color) {
+                               
+        var line = d3.svg.line().x(function (d) { return xScale(d[xColumn]); })
+                              .y(function (d) { return yScale(d[yColumn]); });
+           
+        var lineGraph = projectionOneD.append("path");                                  
+        lineGraph.attr("d", line(data)).attr("stroke", color).attr("stroke-width", "2px");       
+        //lineGraph.exit().remove();
+      }
+      
+      /************************************************************************************/
+      // 1D projection - heat maps     
+      var clickedPaIndex = -1;   
+      var clickedPbIndex = -1; 
+      var clickedPcIndex = -1;
+      
+      function drawHeatMaps(data, xMax, yMax, xColumn, yColumn, yPos, width, height, p, data2, probMax, maxProtein, xPeakPos, length) {   
+        var clickedIndex = -1;     
+        xScale.domain([0, xMax]);      
+        // var bars = projectionOneD.selectAll("rect").data(data);  // doesn't work          
+        var new_group = projectionOneD.append("g");       
+        var bars = new_group.selectAll("rect").data(data);
+        
+        bars.enter().append("rect")
+            .attr("y", yPos)
+            .attr("width", width)
+            .attr("height", height)
+            .attr("class", "HeatMap");
+           
+        bars.attr("x", function (d) { return width*d[xColumn]; })
+            .attr("fill", function (d) {
+              return d3.hsl(20, 0.5+0.45*d[yColumn]/yMax, 0.5+0.45*(yMax-d[yColumn])/yMax);
+              //return d3.hsl(20, 0.9, 0.5);
+            })
+            .on("click", function (d) {
+              switch (p) {
+                case 0:
+                  clickedPaIndex = +d[xColumn];
+                  clickedIndex = clickedPaIndex;
+                  break;
+                case 1:
+                  clickedPbIndex = +d[xColumn];
+                  clickedIndex = clickedPbIndex;
+                  break;
+                case 2:
+                  clickedPcIndex = +d[xColumn];
+                  clickedIndex = clickedPcIndex;
+                  break;
+                default:
+                  break;
+              }
+              console.log("Pa clicked: " + clickedPaIndex);
+              console.log("Pb clicked: " + clickedPbIndex);
+              console.log("Pc clicked: " + clickedPcIndex);
+              
+              // highlight the selected bar
+              if (clickedIndex != -1) {
+                var sBar = new_group.append("rect");
+                sBar.attr("x", width*clickedIndex)
+                    .attr("y", yPos - height/4)
+                    .attr("width", width)
+                    .attr("height", height*3/2)
+                    .attr("fill", "none")
+                    .style("fill-opacity", 0.1)
+                    .attr("stroke", "black");
+              }
+              
+              if (clickedPaIndex != -1 && clickedPbIndex != -1 && clickedPcIndex != -1) {
+                show_peaks = false;
+                projectionOneD_peaks.selectAll("*").remove(); 
+              
+                var peaks = [];
+                peaks.push(clickedPaIndex);
+                peaks.push(clickedPbIndex);
+                peaks.push(clickedPcIndex);
+                var fillColor; // = d3.hsl(20, 0.9, 0.55);
+                for (var r = 0; r < data2.length; r++) {
+                  var row = d3.values(data2[r]);
+                  if (clickedPaIndex == row[0] && clickedPbIndex == row[1] && clickedPcIndex == row[2]) {
+                    fillColor = d3.hsl(20, 0.5+0.45*row[currentTime+3]/probMax, 0.5+0.45*(probMax-row[currentTime+3])/probMax);
+                    break;
+                  }
+                }
+                drawLocation(xPeakPos, 0, length, peaks, maxProtein, fillColor);               
+              }
+            });
+        //bars.exit().remove();
+        /*if (clickedIndex != -1) {
+          // highlight the selected bar
+          var sBar = new_group.append("rect");
+          sBar.attr("x", width*clickedIndex)
+              .attr("y", yPos - height/4)
+              .attr("width", width)
+              .attr("height", height*3/2)
+              .attr("fill", "none")
+              .style("fill-opacity", 0.1)
+              .attr("stroke", "black");
+        }*/
+      }
+      
+      function outerline(yPos, width, height, color) {
+        var outter = projectionOneD.append("rect")
+              .attr("x", 0)
+              .attr("y", yPos)
+              .attr("width", width)
+              .attr("height", height)
+              .attr("fill", "none")
+              .attr("stroke", color);
+      }
+      
+      /************************************************************************************/
+      // locations of states
+      var projectionOneD_peaks = main.append("g")
+            .attr("transform", "translate(" + (lineGraphWidth + shiftX*2) + "," + shiftY + ")");  
+            
+      function drawLocation(xPos, yPos, length, actual_location, max_location, color) {
+                
+        var location_max = projectionOneD_peaks.append("g");
+        var h = length / protein_type;
+        for (var j = 0; j < protein_type; j++) {
+          location_max.append("rect")
+                  .attr("x", xPos)
+                  .attr("y", yPos+h*j)
+                  .attr("width", length)
+                  .attr("height", h)
+                  .attr("stroke", "gray")
+                  .attr("fill", "none");
+        }
+        
+        var location = projectionOneD_peaks.append("g");
+        for (var j = 0; j < protein_type; j++) {
+          location.append("rect")
+                  .attr("x", xPos)
+                  .attr("y", yPos+h*j)
+                  .attr("width", length*actual_location[j]/max_location[j])
+                  .attr("height", h)
+                  .attr("stroke", "gray")
+                  .attr("fill", color);
+                  
+          location.append("text")
+                  .style("text-anchor", "left")
+                  .attr("transform", "translate(" + (xPos + length*actual_location[j]/max_location[j] + 5) + "," + (yPos + h*(j+0.6)) + ")")
+                  .attr("font-size", length/10 + "pt")
+                  .attr("fill", "black")
+                  .text(actual_location[j]);
+        }
+              
+        var gene =  projectionOneD_peaks.append("g");
+        var d = length / gene_type;
+        for (var i = 0; i < gene_type; i++) {
+          gene.append("rect")
+              .attr("x", xPos-d)
+              .attr("y", yPos+d*i)
+              .attr("width", d)
+              .attr("height", d)
+              .attr("stroke", "black")
+              .attr("fill", "gray");     
+        }
+      }
+      
+      /************************************************************************************/
+      // 2D projection - heat maps
+      var twoDHeatMapWidth = main_width - shiftX*3;
+      var twoDHeatMapHeight = main_height - shiftY*4;            
+      var xScale_twoD = d3.scale.linear().range([0, twoDHeatMapWidth]);
+      var yScale_twoD = d3.scale.linear().range([twoDHeatMapHeight, 0]);
+      
+      // draw x/y-axis
+      function draw2DAxis(xMax, yMax, xLabelText, yLabelText) {
+        xScale_twoD.domain([0, xMax]);
+        yScale_twoD.domain([0, yMax]);
+        
+        var xAxis = d3.svg.axis().scale(xScale_twoD).orient("bottom");
+        var yAxis = d3.svg.axis().scale(yScale_twoD).orient("left");
+      
+        var xAxisG = projectionTwoD.append("g")
+              .attr("transform", "translate(0," + twoDHeatMapHeight + ")")
+              .attr("class", "x axis");
+        var yAxisG = projectionTwoD.append("g")
+              .attr("class", "y axis");
+            
+        xAxisG.call(xAxis);
+        yAxisG.call(yAxis);
+        
+        var xAxisLabel = xAxisG.append("text")
+            .style("text-anchor", "left")
+            .attr("transform", "translate(" + (twoDHeatMapWidth+10) + "," + "0)")
+            .attr("class", "label")
+            .text(xLabelText);
+            
+        var yAxisLabel = yAxisG.append("text")
+            .style("text-anchor", "middle")
+            .attr("transform", "translate(" + 0 + "," + (-15) + ")")
+            .attr("class", "label")
+            .text(yLabelText);
+      }
+      
+      var clickedState;
+      
+      function draw2DHeatMap(data, pMax0, t, data3Ps) {
+        var headerRow_twoD = Object.keys(data[0]);  // get keys from the first row        
+        var xMax = d3.max(data, function (d) { return +d[headerRow_twoD[1]]; });
+        var yMax = d3.max(data, function (d) { return +d[headerRow_twoD[0]]; });
+        var pMax = findMax(data, headerRow_twoD, 2);  // max prob in the current selected file       
+        //console.log([xMax, yMax, pMax]);
+        
+        var width = twoDHeatMapWidth / (xMax+1);
+        var height = twoDHeatMapHeight / (yMax+1);
+        
+        xScale_twoD.domain([0, xMax]);
+        yScale_twoD.domain([0, yMax]);
+        
+        var new_group = projectionTwoD.append("g");       
+        var cell = new_group.selectAll("rect").data(data);
+        
+        cell.enter().append("rect")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("class", "HeatMap");
+        
+        cell.attr("x", function (d) { return width*d[headerRow_twoD[1]]; })
+            .attr("y", function (d) { return height*(yMax-d[headerRow_twoD[0]]); })
+            .attr("fill", function (d) {
+              return d3.hsl(20, 0.5+0.45*d[headerRow_twoD[t+2]]/pMax, 0.5+0.45*(pMax-d[headerRow_twoD[t+2]])/pMax);
+            })
+            .on("click", function (d) {
+              show_detailTwoD = true;
+              clickedState = d;
+              console.log("pass d to state: " + clickedState);
+              drawCell(d, pMax, headerRow_twoD[0], headerRow_twoD[1]);             
+            });  
+                    
+        // display timeline curves
+        if (show_projectionTwoD_time) {
+          console.log("first column: " + yMax);
+          console.log("second column: " + xMax);
+          for (var i = 0; i <= yMax; i++) {
+            for (var j = 0; j <= xMax; j++) {
+              var dataCell = [];  // prob in each cell over time
+              for (var k = 0; k < TimeStep; k++) {
+                dataCell.push(d3.values(data[i*(xMax+1)+j])[k+2]);
+              }
+            
+              var x = d3.scale.linear().domain([0, TimeStep-1]).range([width*j, width*(j+1)]);
+              var y = d3.scale.linear().domain([0, pMax]).range([twoDHeatMapHeight - height*i, twoDHeatMapHeight - height*(i+1)]);
+              var line = d3.svg.line()
+                    .x(function (d, i) { return x(i); })
+                    .y(function (d) { return y(d); });
+              
+              var lineGraph = projectionTwoD.append("path");//.attr("transform", "translate(" + width/TimeStep/2 + ",0)");                                  
+              lineGraph.attr("d", line(dataCell)).attr("stroke", "black").attr("stroke-width", "1px"); 
+            }         
+          }
+        } // end - if
+        
+        // display the 3rd protein curves
+        if (show_projectionTwoD_3rdP) {
+          //draw3rdProteinCurve(data, pMax, t);
+          var headerRow_threeD = Object.keys(data3Ps[0]);  // get keys from the first row  
+          var index_3rdP;
+          for (var i = 0; i < 3; i++) {
+            if (headerRow_threeD[i] != headerRow_twoD[0] && headerRow_threeD[i] != headerRow_twoD[1]) {              
+              index_3rdP = i;
+              break;
+            }          
+          }
+          console.log("3rd: " + index_3rdP + " - " + headerRow_threeD[index_3rdP]);
+          var cMax = d3.max(data3Ps, function (d) { return +d[headerRow_threeD[index_3rdP]]; });
+          console.log("3rd max: " + cMax);
+          console.log("3rd length: " + data3Ps.length);
+          /*
+          for (var i = 0; i < data3Ps.length; i++) {
+            switch (index_3rdP) {
+              case 0:
+                
+                break;
+              case 1:
+                
+                break;
+              case 2:
+                console.log(index_3rdP);
+                var dataCell = [];  // prob in each cell over time
+                break;             
+              default:
+                break;
+            }     
+            var x = d3.scale.linear().domain([0, TimeStep-1]).range([width*jj, width*(jj+1)]);
+            var y = d3.scale.linear().domain([0, pMax]).range([twoDHeatMapHeight - height*ii, twoDHeatMapHeight - height*(ii+1)]);
+            var line = d3.svg.line()
+                  .x(function (d, i) { return x(i); })
+                  .y(function (d) { return y(d); });
+              
+            var lineGraph = projectionTwoD.append("path");//.attr("transform", "translate(" + width/TimeStep/2 + ",0)");                                  
+            lineGraph.attr("d", line(dataCell)).attr("stroke", "black").attr("stroke-width", "1px");        
+          }
+          /*
+          for (var i = 0; i <= yMax; i++) {
+            for (var j = 0; j <= xMax; j++) {
+              var dataCell = [];  // prob in each cell over time
+              
+              for (var k = 0; k < data3Ps.length; k++) {
+                switch (index_3rdP) {
+                  case 0:
+                    if (i == d3.values(data3Ps[k])[1] && j == d3.values(data3Ps[k])[2]) {
+                      dataCell.push(d3.values(data3Ps[k])[t+3]);
+                    }
+                    break;
+                  case 1:
+                    if (i == d3.values(data3Ps[k])[0] && j == d3.values(data3Ps[k])[2]) {
+                      dataCell.push(d3.values(data3Ps[k])[t+3]);
+                    }
+                    break;
+                  case 2:
+                    if (i == d3.values(data3Ps[k])[0] && j == d3.values(data3Ps[k])[1]) {
+                      dataCell.push(d3.values(data3Ps[k])[t+3]);
+                    }
+                    break;             
+                  default:
+                    break;
+                }               
+              }
+              console.log(dataCell); 
+              var x = d3.scale.linear().domain([0, TimeStep-1]).range([width*j, width*(j+1)]);
+              var y = d3.scale.linear().domain([0, pMax]).range([twoDHeatMapHeight - height*i, twoDHeatMapHeight - height*(i+1)]);
+              var line = d3.svg.line()
+                    .x(function (d, i) { return x(i); })
+                    .y(function (d) { return y(d); });
+              
+              var lineGraph = projectionTwoD.append("path");//.attr("transform", "translate(" + width/TimeStep/2 + ",0)");                                  
+              lineGraph.attr("d", line(dataCell)).attr("stroke", "black").attr("stroke-width", "1px");              
+            }
+          }*/
+          
+        } // end - if
+        
+        console.log("show_detailTwoD: " + show_detailTwoD);        
+        if (show_detailTwoD) {
+          drawCell(clickedState, pMax, headerRow_twoD[0], headerRow_twoD[1]);
+        }
+        
+        draw2DAxis(xMax, yMax, headerRow_twoD[1], headerRow_twoD[0]);     
+        
+        // draw legend
+        var legend = projectionTwoD.append("g").attr("class", "HeatMap");  
+        for (var i = 0; i < 50; i++) {
+          legend.append("rect")   
+                .attr("x", twoDHeatMapWidth + shiftX*2/3)
+                .attr("y", shiftY + 3*i)
+                .attr("width", margin*1.5)
+                .attr("height", 3)
+                .attr("fill", d3.hsl(20, 0.5+0.45*(50-i)/50, 0.5+0.45*(1-(50-i)/50)));        
+        } 
+        legend.append("text")
+              .style("text-anchor", "middle")
+              .attr("transform", "translate(" + (twoDHeatMapWidth + shiftX*2/3 + margin*1.5/2) + "," + (shiftY + 3*50 + 15) + ")")
+              .attr("font-size", "12pt")
+              .text("0"); 
+        legend.append("text")
+              .style("text-anchor", "middle")
+              .attr("transform", "translate(" + (twoDHeatMapWidth + shiftX*2/3 + margin*1.5/2) + "," + (shiftY - 5) + ")")
+              .attr("font-size", "12pt")
+              .text(d3.round(pMax, 3));      
+      }
+      /************************************************************************************/
+      function drawCell(state, pMax, p0, p1) {
+        console.log("show state: " + state);       
+        
+        var x0 = shiftX*2;
+        var y0 = shiftY*4;
+        var w = (twoDHeatMapWidth - shiftX*4) / TimeStep;
+        var h = twoDHeatMapHeight - shiftY*8;
+        
+        var detailCell = projectionTwoD.append("g").attr("class", "HeatMap");       
+        for (var i = 0; i < TimeStep; i++) {
+          detailCell.append("rect")
+                    .attr("x", x0 + w*i)
+                    .attr("y", y0)
+                    .attr("width", w+1)
+                    .attr("height", h)
+                    .attr("fill", function (d) {
+                      return d3.hsl(20, 0.5+0.45*d3.values(state)[i+2]/pMax, 0.5+0.45*(pMax-d3.values(state)[i+2])/pMax);
+                    });
+        }
+        detailCell.append("text")
+                  .style("text-anchor", "middle")
+                  .attr("transform", "translate(" + (twoDHeatMapWidth - shiftX*4) + "," + (y0 + shiftY) + ")")
+                  .attr("font-size", "12pt")
+                  .text(p0 + ": " + d3.values(state)[0]);
+        detailCell.append("text")
+                  .style("text-anchor", "middle")
+                  .attr("transform", "translate(" + (twoDHeatMapWidth - shiftX*4) + "," + (y0 + shiftY*2) + ")")
+                  .attr("font-size", "12pt")
+                  .text(p1 + ": " + d3.values(state)[1]);
+                        
+        // time line curve
+        var data = [];
+        for (var i = 0; i < TimeStep; i++) {
+          data.push(d3.values(state)[i+2]);
+        }
+        //console.log(data);        
+        var x = d3.scale.linear().domain([0, TimeStep]).range([x0, w*TimeStep + x0]);
+        var y = d3.scale.linear().domain([0, pMax]).range([h + y0, y0]);
+        var line = d3.svg.line()
+              .x(function (d, i) { return x(i); })
+              .y(function (d) { return y(d); });
+                
+        var lineGraph = projectionTwoD.append("path").attr("transform", "translate(" + w/2 + ",0)");                                  
+        lineGraph.attr("d", line(data)).attr("stroke", "black"); 
+        
+        var boundray = projectionTwoD.append("rect")
+              .attr("x", x0)
+              .attr("y", y0)
+              .attr("width", w*TimeStep)
+              .attr("height", h)
+              .attr("fill", "none")
+              .attr("stroke", "black");
+              
+        var closeButton = projectionTwoD.append("circle")
+              .attr("cx", w*TimeStep + x0)
+              .attr("cy", y0)
+              .attr("r", 10)
+              .attr("fill", "white")
+              .attr("stroke", "black")
+              .on("click", function () {
+                show_detailTwoD = false;
+                detailCell.remove();
+                lineGraph.remove();
+                boundray.remove();
+                closeButton.remove();
+              });
+      } 
+      
+      /************************************************************************************/
+      // display the 3rd protein curves
+      function draw3rdProteinCurve(data, pMax, time) {
+        var headerRow_twoD = Object.keys(data[0]);  // get keys from the first row        
+        var xMax = d3.max(data, function (d) { return +d[headerRow_twoD[1]]; });
+        var yMax = d3.max(data, function (d) { return +d[headerRow_twoD[0]]; });
+        
+        for (var i = 0; i <= yMax; i++) {
+          for (var j = 0; j <= xMax; j++) {
+            
+          }
+        }
+      }     
+      /*********************************************************************************************************************************************/
+      /*********************************************************************************************************************************************/  
+      
+      // find max prob in the entire file (over time)
+        var findMax = function (data, headerRow, shift) {
+          var max = 0;
+          for (var i = 0; i < TimeStep; i++) {
+            var temp =  d3.max(data, function (d) { return +d[headerRow[i+shift]]; });
+            if (max < temp) {
+              max = temp;
+            }
+          }
+          return max;
+        }
+        
+      // find peaks of each specie of proteins at current time  
+        function findPeaks(data, rows, shift) {  
+          var peaks = [];    
+          var peak_num = 0;
+          if (+d3.values(data[0])[currentTime+shift] >= +d3.values(data[1])[currentTime+shift]) {
+            peaks.push(0);
+            peak_num++;
+          }
+          for (var i = 1; i <= rows-1; i++) {
+            var row_value_left = d3.values(data[i-1]);
+            var row_value_middle = d3.values(data[i]);
+            var row_value_right = d3.values(data[i+1]);
+            if (+row_value_middle[currentTime+shift] >= +row_value_left[currentTime+shift] 
+              && +row_value_middle[currentTime+shift] >= +row_value_right[currentTime+shift]) {
+              peaks.push(i);
+              peak_num++;
+            }
+          }
+          if (+d3.values(data[rows])[currentTime+shift] >= +d3.values(data[rows-1])[currentTime+shift]) {
+            peaks.push(rows);
+            peak_num++;
+          }
+          return peaks;
+          //return peak_num;
+        }
+      
+      /************************************************************************************/
+      /************************************************************************************/        
+      // load multiple files and draw     
+      queue()
+        .defer(d3.csv, "http://localhost:8080/Desktop/BioinformaticsVis/D3/Pa_t0-20.csv")
+        .defer(d3.csv, "http://localhost:8080/Desktop/BioinformaticsVis/D3/Pb_t0-20.csv")
+        .defer(d3.csv, "http://localhost:8080/Desktop/BioinformaticsVis/D3/Pc_t0-20.csv")
+        .defer(d3.csv, "http://localhost:8080/Desktop/BioinformaticsVis/D3/Pab_t0-20.csv")
+        .defer(d3.csv, "http://localhost:8080/Desktop/BioinformaticsVis/D3/Pac_t0-20.csv")
+        .defer(d3.csv, "http://localhost:8080/Desktop/BioinformaticsVis/D3/Pbc_t0-20.csv")
+        .defer(d3.csv, "http://localhost:8080/Desktop/BioinformaticsVis/D3/Pabc_t0-20.csv")
+        .defer(d3.csv, "http://localhost:8080/Desktop/BioinformaticsVis/D3/state_space.csv")
+        .await(loadAll);
+        
+      function loadAll(error, Pa_t20, Pb_t20, Pc_t20, Pab_t20, Pac_t20, Pbc_t20, Pabc_t20, States) {
+        if (error) {
+          console.log(error);
+        }
+        
+        var headerRow_threeD = Object.keys(Pabc_t20[0]);    
+        //console.log(headerRow_threeD[0]); 
+        //console.log(Pabc_t20.length);
+                        
+        var headerRow_states = Object.keys(States[0]);    
+        //console.log(headerRow_states[0]); 
+        
+        /************************************************************************************/
+        // draw oneD projections       
+        var headerRow_oneD = Object.keys(Pa_t20[0]);  // get keys from the first row
+        //console.log(headerRow_oneD[0]);
+               
+        var xMaxP = [];
+        xMaxP[0] = d3.max(Pa_t20, function (d) { return +d[headerRow_oneD[0]]; });
+        xMaxP[1] = d3.max(Pb_t20, function (d) { return +d[headerRow_oneD[0]]; });
+        xMaxP[2] = d3.max(Pc_t20, function (d) { return +d[headerRow_oneD[0]]; });
+        console.log("xMaxP: " + xMaxP);
+        
+        var xMax_oneD = d3.max(xMaxP);                    
+        var yMax_oneD = d3.max([findMax(Pa_t20, headerRow_oneD, 1), findMax(Pc_t20, headerRow_oneD, 1), findMax(Pc_t20, headerRow_oneD, 1)]) + 0.01;
+        console.log("max x/y: " + [xMax_oneD, yMax_oneD]);
+        
+        var probMax3D = findMax(Pabc_t20, headerRow_threeD, 3);
+        //console.log(probMax3D);
+               
+        // draw line graphs
+        function lineGraphs() {
+          /*drawLineGraph(Pa_t20, headerRow[0], headerRow[currentTime+1], d3.hsl(5, 0.9, 0.55));
+          drawLineGraph(Pb_t20, headerRow[0], headerRow[currentTime+1], "hsl(105, 90%, 55%)");
+          drawLineGraph(Pc_t20, headerRow[0], headerRow[currentTime+1], "hsl(225, 90%, 55%)");
+          */
+          for (var i = 0; i < TimeStep; i++) {
+            drawLineGraph(Pa_t20, headerRow_oneD[0], headerRow_oneD[i+1], d3.hsl(5, 0.9, 0.55+(TimeStep-i-1)*0.3/TimeStep));
+            drawLineGraph(Pb_t20, headerRow_oneD[0], headerRow_oneD[i+1], d3.hsl(105, 0.9, 0.55+(TimeStep-i-1)*0.3/TimeStep));
+            drawLineGraph(Pc_t20, headerRow_oneD[0], headerRow_oneD[i+1], d3.hsl(225, 0.9, 0.55+(TimeStep-i-1)*0.3/TimeStep));
+          }
+        }   
+                                   
+        // draw 1D heat maps        
+        function oneDHeatMaps() {
+          var deltaY = (main_height/2 - shiftY*6)/3;
+          drawHeatMaps(Pa_t20, xMax_oneD, yMax_oneD, headerRow_oneD[0], headerRow_oneD[currentTime+1], main_height/2 + shiftY*4, lineGraphWidth/xMax_oneD, deltaY*2/3,
+            0, Pabc_t20, probMax3D, xMaxP, shiftX*2, main_width*2/5 - shiftX*5);
+          drawHeatMaps(Pb_t20, xMax_oneD, yMax_oneD, headerRow_oneD[0], headerRow_oneD[currentTime+1], main_height/2 + shiftY*4 + deltaY, lineGraphWidth/xMax_oneD, deltaY*2/3,
+            1, Pabc_t20, probMax3D, xMaxP, shiftX*2, main_width*2/5 - shiftX*5);
+          drawHeatMaps(Pc_t20, xMax_oneD, yMax_oneD, headerRow_oneD[0], headerRow_oneD[currentTime+1], main_height/2 + shiftY*4 + deltaY*2, lineGraphWidth/xMax_oneD, deltaY*2/3, 
+            2, Pabc_t20, probMax3D, xMaxP, shiftX*2, main_width*2/5 - shiftX*5);
+          /*for (var i = 0; i < TimeStep; i++) {
+            drawHeatMaps(Pa_t20, headerRow[0], headerRow[i+1], main_height/2 + shiftY*4 + i*deltaY*2/3/TimeStep, lineGraphWidth/xMax, deltaY*2/3/TimeStep);
+            drawHeatMaps(Pb_t20, headerRow[0], headerRow[i+1], main_height/2 + shiftY*4 + deltaY + i*deltaY*2/3/TimeStep, lineGraphWidth/xMax, deltaY*2/3/TimeStep);
+            drawHeatMaps(Pc_t20, headerRow[0], headerRow[i+1], main_height/2 + shiftY*4 + deltaY*2 + i*deltaY*2/3/TimeStep, lineGraphWidth/xMax, deltaY*2/3/TimeStep);
+          }*/
+          outerline(main_height/2 + shiftY*4, lineGraphWidth*(xMaxP[0]+1)/xMax_oneD, deltaY*2/3, d3.hsl(5, 0.9, 0.55));
+          outerline(main_height/2 + shiftY*4 + deltaY, lineGraphWidth*(xMaxP[1]+1)/xMax_oneD, deltaY*2/3, d3.hsl(105, 0.9, 0.55));
+          outerline(main_height/2 + shiftY*4 + deltaY*2, lineGraphWidth*(xMaxP[2]+1)/xMax_oneD, deltaY*2/3, d3.hsl(225, 0.9, 0.55));
+        }
+               
+        /************************************************************************************/
+        // draw peaks               
+        function drawPeaks() {
+          var peaks_Pa = findPeaks(Pa_t20, xMaxP[0], 1);
+          var peaks_Pb = findPeaks(Pb_t20, xMaxP[1], 1);
+          var peaks_Pc = findPeaks(Pc_t20, xMaxP[2], 1);
+          console.log("peaks of Pa: " + peaks_Pa);
+          console.log("peaks of Pb: " + peaks_Pb);
+          console.log("peaks of Pc: " + peaks_Pc);
+        
+          var peaks_num = peaks_Pa.length * peaks_Pb.length * peaks_Pc.length;
+          console.log("# of peaks: " + peaks_num);
+          var length = Math.min(main_width*2/5 - shiftX*5, (main_height - shiftY*(peaks_num+1)) / peaks_num);
+          var xPos = shiftX*2;
+          var yPos = 0;
+        
+          for (var i = 0; i < peaks_Pa.length; i++) {
+            for (var j = 0; j < peaks_Pb.length; j++) {
+              for (var k = 0; k < peaks_Pc.length; k++) {
+                var peaks = [];
+                peaks.push(peaks_Pa[i]);
+                peaks.push(peaks_Pb[j]);
+                peaks.push(peaks_Pc[k]);
+                var fillColor; // = d3.hsl(20, 0.9, 0.55);
+                for (var r = 0; r < Pabc_t20.length; r++) {
+                  var row = d3.values(Pabc_t20[r]);
+                  if (peaks_Pa[i] == row[0] && peaks_Pb[j] == row[1] && peaks_Pc[k] == row[2]) {
+                    fillColor = d3.hsl(20, 0.5+0.45*row[currentTime+3]/probMax3D, 0.5+0.45*(probMax3D-row[currentTime+3])/probMax3D);
+                    break;
+                  }
+                }
+                drawLocation(xPos, yPos + (shiftY+length)*k, length, peaks, xMaxP, fillColor);
+              }            
+            }         
+          }
+        }       
+        
+        /************************************************************************************/
+        // draw twoD projections
+        var headerRow_twoD = Object.keys(Pab_t20[0]);  // get keys from the first row
+        //console.log(headerRow_twoD[0]);
+                   
+        var probMax2D = d3.max([findMax(Pab_t20, headerRow_twoD, 2), findMax(Pac_t20, headerRow_twoD, 2), findMax(Pbc_t20, headerRow_twoD, 2)]) + 0.01;      
+        
+        /************************************************************************************/
+        // control buttons to show/hide the views         
+         var button1D = controlPanel.append("g").append("circle")
+            .attr("cx", 20)
+            .attr("cy", 19)
+            .attr("r", 7)
+            .attr("fill", "white")
+            .attr("stroke", "black")
+            .on("click", function () {
+              if (show_projectionOneD) {
+                show_projectionOneD = false;
+              } else {
+                show_projectionOneD = true;
+                show_projectionTwoD = false;
+                show_projectionTwoD_Pab = false;
+                show_projectionTwoD_Pac = false;
+                show_projectionTwoD_Pbc = false;
+                show_projectionThreeD = false;
+              }
+              console.log("p1 Clicked!");
+              console.log(show_projectionOneD);
+              showHide();
+            });
+         
+         var button2D = controlPanel.append("g").append("circle")
+            .attr("cx", 20)
+            .attr("cy", 19+25)
+            .attr("r", 7)
+            .attr("fill", "white")
+            .attr("stroke", "black")
+            .on("click", function () {
+              if (show_projectionTwoD) {
+                show_projectionTwoD = false;
+                show_projectionTwoD_Pab = false;
+                show_projectionTwoD_Pac = false;
+                show_projectionTwoD_Pbc = false;
+                show_detailTwoD = false;
+              } else {
+                show_projectionOneD = false;
+                show_projectionTwoD = true;
+                show_projectionTwoD_Pab = true;
+                show_projectionTwoD_Pac = false;
+                show_projectionTwoD_Pbc = false;
+                show_detailTwoD = false;
+                show_projectionThreeD = false;
+              }
+              console.log("p2 Clicked!");
+              console.log(show_projectionTwoD);
+              showHide();
+            });
+         
+         var button2D_ab = controlPanel.append("g").append("circle")
+            .attr("cx", 40+7)
+            .attr("cy", 19+25*2)
+            .attr("r", 7)
+            .attr("fill", "white")
+            .attr("stroke", "black")
+            .on("click", function () {
+              if (show_projectionTwoD_Pab) {
+                show_projectionTwoD_Pab = false;
+              } else {
+                show_projectionOneD = false;
+                show_projectionTwoD = true;
+                show_projectionTwoD_Pab = true;
+                show_projectionTwoD_Pac = false;
+                show_projectionTwoD_Pbc = false;
+                show_detailTwoD = false;
+                show_projectionThreeD = false;
+              }
+              console.log("p2_ab Clicked!");
+              console.log(show_projectionTwoD);
+              showHide();
+            });
+         
+         var button2D_ac = controlPanel.append("g").append("circle")
+            .attr("cx", 40+7)
+            .attr("cy", 19+25*3)
+            .attr("r", 7)
+            .attr("fill", "white")
+            .attr("stroke", "black")
+            .on("click", function () {
+              if (show_projectionTwoD_Pac) {
+                show_projectionTwoD_Pac = false;
+              } else {
+                show_projectionOneD = false;
+                show_projectionTwoD = true;
+                show_projectionTwoD_Pab = false;
+                show_projectionTwoD_Pac = true;
+                show_projectionTwoD_Pbc = false;
+                show_detailTwoD = false;
+                show_projectionThreeD = false;
+              }
+              console.log("p2_ac Clicked!");
+              console.log(show_projectionTwoD);
+              showHide();
+            });
+         
+         var button2D_bc = controlPanel.append("g").append("circle")
+            .attr("cx", 40+7)
+            .attr("cy", 19+25*4)
+            .attr("r", 7)
+            .attr("fill", "white")
+            .attr("stroke", "black")
+            .on("click", function () {
+              if (show_projectionTwoD_Pbc) {
+                show_projectionTwoD_Pbc = false;
+              } else {
+                show_projectionOneD = false;
+                show_projectionTwoD = true;
+                show_projectionTwoD_Pab = false;
+                show_projectionTwoD_Pac = false;
+                show_projectionTwoD_Pbc = true;
+                show_detailTwoD = false;
+                show_projectionThreeD = false;
+              }
+              console.log("p2_bc Clicked!");
+              console.log(show_projectionTwoD);
+              showHide();
+            });
+          
+          var button2D_time = controlPanel.append("g").append("circle")
+            .attr("cx", 40+7)
+            .attr("cy", 19+25*5)
+            .attr("r", 7)
+            .attr("fill", "white")
+            .attr("stroke", "black")
+            .on("click", function () {
+              if (show_projectionTwoD_time) {
+                show_projectionTwoD_time = false;
+              } else {
+                show_projectionTwoD_time = true;
+                show_projectionTwoD_3rdP = false;
+                show_detailTwoD = false;
+                show_projectionTwoD = true;
+              }
+              console.log("p2_time Clicked!");
+              console.log(show_projectionTwoD_time);
+              showHide();
+            });
+          
+          var button2D_3rdP = controlPanel.append("g").append("circle")
+            .attr("cx", 40+7)
+            .attr("cy", 19+25*6)
+            .attr("r", 7)
+            .attr("fill", "white")
+            .attr("stroke", "black")
+            .on("click", function () {
+              if (show_projectionTwoD_3rdP) {
+                show_projectionTwoD_3rdP = false;
+              } else {
+                show_projectionTwoD_time = false;
+                show_projectionTwoD_3rdP = true;
+                show_projectionTwoD = true;
+              }
+              console.log("p2_3rdP Clicked!");
+              console.log(show_projectionTwoD_3rdP);
+              showHide();
+            });
+              
+          var button3D = controlPanel.append("g").append("circle")
+            .attr("cx", 20)
+            .attr("cy", 19+25*7)
+            .attr("r", 7)
+            .attr("fill", "white")
+            .attr("stroke", "black")
+            .on("click", function () {
+              if (show_projectionThreeD) {
+                show_projectionThreeD = false;
+              } else {
+                show_projectionOneD = false;
+                show_projectionTwoD = false;
+                show_projectionTwoD_Pab = false;
+                show_projectionTwoD_Pac = false;
+                show_projectionTwoD_Pbc = false;
+                show_detailTwoD = false;
+                show_projectionThreeD = true;
+              }
+              console.log("p3 Clicked!");
+              console.log(show_projectionThreeD);
+              showHide();
+            });  
+            
+          var buttonPeak = controlPanel.append("g").append("circle")
+            .attr("cx", 20)
+            .attr("cy", 19+25*9)
+            .attr("r", 7)
+            .attr("fill", "white")
+            .attr("stroke", "black")
+            .on("click", function () {
+              if (show_peaks) {
+                show_peaks = false;
+              } else {
+                show_peaks = true;
+                clickedPaIndex = -1;   
+                clickedPbIndex = -1; 
+                clickedPcIndex = -1;
+              }
+              console.log("peaks Clicked!");
+              console.log(show_peaks);
+              showHide();
+            });
+            
+         /************************************************************************************/        
+         // time slider
+         var startingTime = 0;
+         var timeX = d3.scale.linear().domain([0, TimeStep-1]).range([0, controlPanel_width - margin*2]).clamp(true);    
+         var brush = d3.svg.brush().x(timeX).extent([startingTime, startingTime]).on("brush", brushed); 
+         var timeBar = controlPanel.append("g")
+               .attr("transform", "translate(" + margin + "," + (25+25*11) + ")")
+               .attr("class", "x time_axis")
+               .call(d3.svg.axis()
+                 .scale(timeX)
+                 .orient("bottom")
+                 .tickFormat(function (d) { return d; })
+                 .tickSize(0)
+                 .tickPadding(12));
+            //.select(".domain")
+            //.select(function () { console.log(this); return this.parentNode.appendChild(this.cloneNode(true)); })
+            //.attr("class", "halo");
+            
+        var timeSlider = timeBar.append("g")       
+              .attr("class", "slider")
+              .call(brush);      
+         timeSlider.selectAll(".extent,.resize").remove();
+         timeSlider.select(".background").attr("height", 60);
+      
+         var handle = timeSlider.append("g").attr("class", "handle");      
+         handle.append("circle")            
+               .attr("r", 7)
+               .attr("fill", "white");            
+         handle.append("text")
+               .attr("transform", "translate(0," + (-10) + ")")
+               .style("text-align", "center")
+               .attr("font-size", "10pt")
+               .attr("fill", "black")
+               .text(startingTime);
+      
+         timeSlider.call(brush.event); 
+           
+         function brushed() {
+           var value = brush.extent()[0];
+           if (d3.event.sourceEvent) {
+             value = timeX.invert(d3.mouse(this)[0]);
+             brush.extent([value, value]);
+           }
+           if (value - Math.floor(value) < 0.5) {
+             value = Math.floor(value);
+           } else {
+             value = Math.ceil(value);
+           }
+           console.log("time: " + value);
+           handle.attr("transform", "translate(" + timeX(value) + ",0)");
+           handle.select("text").text(value).attr("transform", "translate(0," + (-10) + ")");
+        
+           currentTime = value;
+           showHide();
+         }
+      
+         /************************************************************************************/ 
+         function showHide() {
+           if (show_projectionOneD) {
+              button1D.attr("fill", "black");
+              button2D.attr("fill", "white");
+              button2D_ab.attr("fill", "white");
+              button2D_ac.attr("fill", "white");
+              button2D_bc.attr("fill", "white");
+              button3D.attr("fill", "white");       
+              projectionOneD.selectAll("*").remove();       
+              projectionTwoD.selectAll("*").remove();
+              drawAxis(xMax_oneD, yMax_oneD);  // draw X/Y-axis
+              lineGraphs();
+              oneDHeatMaps();  
+              if (show_peaks) {
+                buttonPeak.attr("fill", "black");
+                projectionOneD_peaks.selectAll("*").remove(); 
+                drawPeaks();
+              } else {
+                buttonPeak.attr("fill", "white");
+                projectionOneD_peaks.selectAll("*").remove(); 
+              }        
+            } else if (show_projectionTwoD_Pab && show_projectionTwoD) {
+              button1D.attr("fill", "white");
+              button2D.attr("fill", "black");
+              button2D_ab.attr("fill", "black");
+              button2D_ac.attr("fill", "white");
+              button2D_bc.attr("fill", "white");
+              button3D.attr("fill", "white");
+              projectionOneD.selectAll("*").remove(); 
+              projectionOneD_peaks.selectAll("*").remove(); 
+              projectionTwoD.selectAll("*").remove();            
+              draw2DHeatMap(Pab_t20, probMax2D, currentTime, Pabc_t20);
+              if (show_peaks) {
+                buttonPeak.attr("fill", "black");
+              } else {
+                buttonPeak.attr("fill", "white");
+              }
+              if (show_projectionTwoD_time) {
+                button2D_time.attr("fill", "black");
+              } else {
+                button2D_time.attr("fill", "white");
+              }
+              if (show_projectionTwoD_3rdP) {
+                button2D_3rdP.attr("fill", "black");
+              } else {
+                button2D_3rdP.attr("fill", "white");
+              }
+            } else if (show_projectionTwoD_Pac && show_projectionTwoD) {
+              button1D.attr("fill", "white");
+              button2D.attr("fill", "black");
+              button2D_ab.attr("fill", "white");
+              button2D_ac.attr("fill", "black");
+              button2D_bc.attr("fill", "white");
+              button3D.attr("fill", "white");
+              projectionOneD.selectAll("*").remove();
+              projectionOneD_peaks.selectAll("*").remove(); 
+              projectionTwoD.selectAll("*").remove();              
+              draw2DHeatMap(Pac_t20, probMax2D, currentTime, Pabc_t20);
+              if (show_peaks) {
+                buttonPeak.attr("fill", "black");
+              } else {
+                buttonPeak.attr("fill", "white");
+              }
+              if (show_projectionTwoD_time) {
+                button2D_time.attr("fill", "black");
+              } else {
+                button2D_time.attr("fill", "white");
+              }
+              if (show_projectionTwoD_3rdP) {
+                button2D_3rdP.attr("fill", "black");
+              } else {
+                button2D_3rdP.attr("fill", "white");
+              }
+            } else if (show_projectionTwoD_Pbc && show_projectionTwoD) {
+              button1D.attr("fill", "white");
+              button2D.attr("fill", "black");
+              button2D_ab.attr("fill", "white");
+              button2D_ac.attr("fill", "white");
+              button2D_bc.attr("fill", "black");
+              button3D.attr("fill", "white");
+              projectionOneD.selectAll("*").remove();
+              projectionOneD_peaks.selectAll("*").remove(); 
+              projectionTwoD.selectAll("*").remove();              
+              draw2DHeatMap(Pbc_t20, probMax2D, currentTime, Pabc_t20);
+              if (show_peaks) {
+                buttonPeak.attr("fill", "black");
+              } else {
+                buttonPeak.attr("fill", "white");
+              }
+              if (show_projectionTwoD_time) {
+                button2D_time.attr("fill", "black");
+              } else {
+                button2D_time.attr("fill", "white");
+              }
+              if (show_projectionTwoD_3rdP) {
+                button2D_3rdP.attr("fill", "black");
+              } else {
+                button2D_3rdP.attr("fill", "white");
+              }
+            } else if (show_projectionThreeD) {
+              button1D.attr("fill", "white");
+              button2D.attr("fill", "white");
+              button2D_ab.attr("fill", "white");
+              button2D_ac.attr("fill", "white");
+              button2D_bc.attr("fill", "white");
+              button3D.attr("fill", "black");
+              projectionOneD.selectAll("*").remove();
+              projectionOneD_peaks.selectAll("*").remove(); 
+              projectionTwoD.selectAll("*").remove(); 
+              if (show_peaks) {
+                buttonPeak.attr("fill", "black");
+              } else {
+                buttonPeak.attr("fill", "white");
+              }
+            } else {
+              button1D.attr("fill", "white");
+              button2D.attr("fill", "white");
+              button2D_ab.attr("fill", "white");
+              button2D_ac.attr("fill", "white");
+              button2D_bc.attr("fill", "white");
+              button3D.attr("fill", "white");
+              projectionOneD.selectAll("*").remove(); 
+              projectionOneD_peaks.selectAll("*").remove(); 
+              projectionTwoD.selectAll("*").remove();
+            }
+         }
+         
+         showHide();
+         
+      }  // end - loadAll()
+      
+      /************************************************************************************/ 
+      /*
+      function type(d) {
+        d.protein_num = +d.protein_num;
+        d.probability = +d.probability;
+        return d;
+      }
+      
+      d3.csv("http://localhost:8080/Desktop/BioinformaticsVis/D3/Pa_t0-20.csv", type, function (dataset) {       
+        var headerRow = Object.keys(dataset[0]);
+        //console.log(headerRow[1]);
+        xMax = d3.max(dataset, function (d) { return +d[headerRow[0]]; });
+        console.log(xMax);
+        yMax = d3.max(dataset, function (d) { return +d[headerRow[1]]; });
+        console.log(yMax);
+        
+        drawLineGraphs(dataset, headerRow[0], headerRow[1]);
+        //drawHeatMaps(dataset);
+      });*/
+           
+      /************************************************************************************/   
+    </script>
+  </body>
+</html>
