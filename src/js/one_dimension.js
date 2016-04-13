@@ -1,5 +1,5 @@
 /************************************************************************************/
-// 1D projection - heat maps
+// 1D projection - visualizations
 
 // initialize the global application variable
 var Application = Application || {};
@@ -19,9 +19,7 @@ Application.oneDV = Application.oneDV || {};
 
     // group all the objects in the main view
 
-    var clickedPaIndex = -1;
-    var clickedPbIndex = -1;
-    var clickedPcIndex = -1;
+
     var projectionOneD = null;
 
     var projectionOneD_peaks = null;
@@ -184,7 +182,7 @@ Application.oneDV = Application.oneDV || {};
                     }
 
                     if (clickedPaIndex != -1 && clickedPbIndex != -1 && clickedPcIndex != -1) {
-                        show_peaks = false;
+                        Application.show_peaks = false;
                         projectionOneD_peaks.selectAll("*").remove();
 
                         var peaks = [];
@@ -199,7 +197,7 @@ Application.oneDV = Application.oneDV || {};
                                 break;
                             }
                         }
-                        drawLocation(xPeakPos, 0, length, peaks, maxProtein, fillColor);
+                        this.drawLocation(xPeakPos, 0, length, peaks, maxProtein, fillColor);
                     }
                 });
             //bars.exit().remove();

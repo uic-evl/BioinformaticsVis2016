@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <meta charset="utf-8">
     <title>Test</title>
     <!-- Stylesheets-->
@@ -12,26 +12,18 @@
 
     <!-- Source -->
     <script src="src/js/main.js"></script>
+    <script src="src/js/utils.js"></script>
+
     <script src="src/js/one_dimension.js"></script>
+    <script src="src/js/two_dimension.js"></script>
+    <script src="src/js/third_dimension.js"></script>
 
-  </head>
-  <body onload="start()">
-    <script>
+</head>
+<body onload="start()">
+<script>
 
-      /************************************************************************************/
-      function start() {
-
-        // control panel
-        var show_projectionOneD = true;
-        var show_projectionTwoD = false;
-        var show_projectionTwoD_Pab = false;
-        var show_projectionTwoD_Pac = false;
-        var show_projectionTwoD_Pbc = false;
-        var show_projectionTwoD_time = false;
-        var show_projectionTwoD_3rdP = false;
-        var show_projectionThreeD = false;
-        var show_peaks = false;
-        var show_detailTwoD = false;
+    /************************************************************************************/
+    function start() {
 
         var svg = d3.select("body").append("svg")
                 .attr("width", Application.outerWidth)
@@ -121,341 +113,12 @@
                 .attr("fill", "none")
                 .attr("stroke", "black");
 
-        var projectionTwoD = main.append("g")
-                .attr("transform", "translate(" + Application.shiftX + "," + Application.shiftY*2 + ")");
-
         /************************************************************************************/
         // 1D projection
 
         Application.oneDV.initialize(main);
+        Application.twoDV.initialize(main);
 
-        /************************************************************************************/
-        // 2D projection - heat maps
-        var twoDHeatMapWidth = Application.main_width - Application.shiftX*3;
-        var twoDHeatMapHeight = Application.main_height - Application.shiftY*4;
-        var xScale_twoD = d3.scale.linear().range([0, twoDHeatMapWidth]);
-        var yScale_twoD = d3.scale.linear().range([twoDHeatMapHeight, 0]);
-
-        // draw x/y-axis
-        function draw2DAxis(xMax, yMax, xLabelText, yLabelText) {
-          xScale_twoD.domain([0, xMax]);
-          yScale_twoD.domain([0, yMax]);
-
-          var xAxis = d3.svg.axis().scale(xScale_twoD).orient("bottom");
-          var yAxis = d3.svg.axis().scale(yScale_twoD).orient("left");
-
-          var xAxisG = projectionTwoD.append("g")
-                  .attr("transform", "translate(0," + twoDHeatMapHeight + ")")
-                  .attr("class", "x axis");
-          var yAxisG = projectionTwoD.append("g")
-                  .attr("class", "y axis");
-
-          xAxisG.call(xAxis);
-          yAxisG.call(yAxis);
-
-          var xAxisLabel = xAxisG.append("text")
-                  .style("text-anchor", "left")
-                  .attr("transform", "translate(" + (twoDHeatMapWidth+10) + "," + "0)")
-                  .attr("class", "label")
-                  .text(xLabelText);
-
-          var yAxisLabel = yAxisG.append("text")
-                  .style("text-anchor", "middle")
-                  .attr("transform", "translate(" + 0 + "," + (-15) + ")")
-                  .attr("class", "label")
-                  .text(yLabelText);
-        }
-
-        var clickedState;
-
-        function draw2DHeatMap(data, pMax0, t, data3Ps) {
-          var headerRow_twoD = Object.keys(data[0]);  // get keys from the first row
-          var xMax = d3.max(data, function (d) { return +d[headerRow_twoD[1]]; });
-          var yMax = d3.max(data, function (d) { return +d[headerRow_twoD[0]]; });
-          var pMax = findMax(data, headerRow_twoD, 2);  // max prob in the current selected file
-          //console.log([xMax, yMax, pMax]);
-
-          var width = twoDHeatMapWidth / (xMax+1);
-          var height = twoDHeatMapHeight / (yMax+1);
-
-          xScale_twoD.domain([0, xMax]);
-          yScale_twoD.domain([0, yMax]);
-
-          var new_group = projectionTwoD.append("g");
-          var cell = new_group.selectAll("rect").data(data);
-
-          cell.enter().append("rect")
-                  .attr("width", width)
-                  .attr("height", height)
-                  .attr("class", "HeatMap");
-
-          cell.attr("x", function (d) { return width*d[headerRow_twoD[1]]; })
-                  .attr("y", function (d) { return height*(yMax-d[headerRow_twoD[0]]); })
-                  .attr("fill", function (d) {
-                    return d3.hsl(20, 0.5+0.45*d[headerRow_twoD[t+2]]/pMax, 0.5+0.45*(pMax-d[headerRow_twoD[t+2]])/pMax);
-                  })
-                  .on("click", function (d) {
-                    show_detailTwoD = true;
-                    clickedState = d;
-                    console.log("pass d to state: " + clickedState);
-                    drawCell(d, pMax, headerRow_twoD[0], headerRow_twoD[1]);
-                  });
-
-          // display timeline curves
-          if (show_projectionTwoD_time) {
-            console.log("first column: " + yMax);
-            console.log("second column: " + xMax);
-            for (var i = 0; i <= yMax; i++) {
-              for (var j = 0; j <= xMax; j++) {
-                var dataCell = [];  // prob in each cell over time
-                for (var k = 0; k < Application.TimeStep; k++) {
-                  dataCell.push(d3.values(data[i*(xMax+1)+j])[k+2]);
-                }
-
-                var x = d3.scale.linear().domain([0, Application.TimeStep-1]).range([width*j, width*(j+1)]);
-                var y = d3.scale.linear().domain([0, pMax]).range([twoDHeatMapHeight - height*i, twoDHeatMapHeight - height*(i+1)]);
-                var line = d3.svg.line()
-                        .x(function (d, i) { return x(i); })
-                        .y(function (d) { return y(d); });
-
-                var lineGraph = projectionTwoD.append("path");//.attr("transform", "translate(" + width/TimeStep/2 + ",0)");
-                lineGraph.attr("d", line(dataCell)).attr("stroke", "black").attr("stroke-width", "1px");
-              }
-            }
-          } // end - if
-
-          // display the 3rd protein curves
-          if (show_projectionTwoD_3rdP) {
-            //draw3rdProteinCurve(data, pMax, t);
-            var headerRow_threeD = Object.keys(data3Ps[0]);  // get keys from the first row
-            var index_3rdP;
-            for (var i = 0; i < 3; i++) {
-              if (headerRow_threeD[i] != headerRow_twoD[0] && headerRow_threeD[i] != headerRow_twoD[1]) {
-                index_3rdP = i;
-                break;
-              }
-            }
-            console.log("3rd: " + index_3rdP + " - " + headerRow_threeD[index_3rdP]);
-            var cMax = d3.max(data3Ps, function (d) { return +d[headerRow_threeD[index_3rdP]]; });
-            console.log("3rd max: " + cMax);
-            console.log("3rd length: " + data3Ps.length);
-            /*
-             for (var i = 0; i < data3Ps.length; i++) {
-             switch (index_3rdP) {
-             case 0:
-
-             break;
-             case 1:
-
-             break;
-             case 2:
-             console.log(index_3rdP);
-             var dataCell = [];  // prob in each cell over time
-             break;
-             default:
-             break;
-             }
-             var x = d3.scale.linear().domain([0, TimeStep-1]).range([width*jj, width*(jj+1)]);
-             var y = d3.scale.linear().domain([0, pMax]).range([twoDHeatMapHeight - height*ii, twoDHeatMapHeight - height*(ii+1)]);
-             var line = d3.svg.line()
-             .x(function (d, i) { return x(i); })
-             .y(function (d) { return y(d); });
-
-             var lineGraph = projectionTwoD.append("path");//.attr("transform", "translate(" + width/TimeStep/2 + ",0)");
-             lineGraph.attr("d", line(dataCell)).attr("stroke", "black").attr("stroke-width", "1px");
-             }
-             /*
-             for (var i = 0; i <= yMax; i++) {
-             for (var j = 0; j <= xMax; j++) {
-             var dataCell = [];  // prob in each cell over time
-
-             for (var k = 0; k < data3Ps.length; k++) {
-             switch (index_3rdP) {
-             case 0:
-             if (i == d3.values(data3Ps[k])[1] && j == d3.values(data3Ps[k])[2]) {
-             dataCell.push(d3.values(data3Ps[k])[t+3]);
-             }
-             break;
-             case 1:
-             if (i == d3.values(data3Ps[k])[0] && j == d3.values(data3Ps[k])[2]) {
-             dataCell.push(d3.values(data3Ps[k])[t+3]);
-             }
-             break;
-             case 2:
-             if (i == d3.values(data3Ps[k])[0] && j == d3.values(data3Ps[k])[1]) {
-             dataCell.push(d3.values(data3Ps[k])[t+3]);
-             }
-             break;
-             default:
-             break;
-             }
-             }
-             console.log(dataCell);
-             var x = d3.scale.linear().domain([0, TimeStep-1]).range([width*j, width*(j+1)]);
-             var y = d3.scale.linear().domain([0, pMax]).range([twoDHeatMapHeight - height*i, twoDHeatMapHeight - height*(i+1)]);
-             var line = d3.svg.line()
-             .x(function (d, i) { return x(i); })
-             .y(function (d) { return y(d); });
-
-             var lineGraph = projectionTwoD.append("path");//.attr("transform", "translate(" + width/TimeStep/2 + ",0)");
-             lineGraph.attr("d", line(dataCell)).attr("stroke", "black").attr("stroke-width", "1px");
-             }
-             }*/
-
-          } // end - if
-
-          console.log("show_detailTwoD: " + show_detailTwoD);
-          if (show_detailTwoD) {
-            drawCell(clickedState, pMax, headerRow_twoD[0], headerRow_twoD[1]);
-          }
-
-          draw2DAxis(xMax, yMax, headerRow_twoD[1], headerRow_twoD[0]);
-
-          // draw legend
-          var legend = projectionTwoD.append("g").attr("class", "HeatMap");
-          for (var i = 0; i < 50; i++) {
-            legend.append("rect")
-                    .attr("x", twoDHeatMapWidth + Application.shiftX*2/3)
-                    .attr("y", Application.shiftY + 3*i)
-                    .attr("width", Application.margin*1.5)
-                    .attr("height", 3)
-                    .attr("fill", d3.hsl(20, 0.5+0.45*(50-i)/50, 0.5+0.45*(1-(50-i)/50)));
-          }
-          legend.append("text")
-                  .style("text-anchor", "middle")
-                  .attr("transform", "translate(" + (twoDHeatMapWidth + Application.shiftX*2/3 +
-                          Application.margin*1.5/2) + "," + (Application.shiftY + 3*50 + 15) + ")")
-                  .attr("font-size", "12pt")
-                  .text("0");
-          legend.append("text")
-                  .style("text-anchor", "middle")
-                  .attr("transform", "translate(" + (twoDHeatMapWidth + Application.shiftX*2/3 +
-                          Application.margin*1.5/2) + "," + (Application.shiftY - 5) + ")")
-                  .attr("font-size", "12pt")
-                  .text(d3.round(pMax, 3));
-        }
-        /************************************************************************************/
-        function drawCell(state, pMax, p0, p1) {
-          console.log("show state: " + state);
-
-          var x0 = shiftX*2;
-          var y0 = shiftY*4;
-          var w = (twoDHeatMapWidth - shiftX*4) / TimeStep;
-          var h = twoDHeatMapHeight - shiftY*8;
-
-          var detailCell = projectionTwoD.append("g").attr("class", "HeatMap");
-          for (var i = 0; i < TimeStep; i++) {
-            detailCell.append("rect")
-                    .attr("x", x0 + w*i)
-                    .attr("y", y0)
-                    .attr("width", w+1)
-                    .attr("height", h)
-                    .attr("fill", function (d) {
-                      return d3.hsl(20, 0.5+0.45*d3.values(state)[i+2]/pMax, 0.5+0.45*(pMax-d3.values(state)[i+2])/pMax);
-                    });
-          }
-          detailCell.append("text")
-                  .style("text-anchor", "middle")
-                  .attr("transform", "translate(" + (twoDHeatMapWidth - shiftX*4) + "," + (y0 + shiftY) + ")")
-                  .attr("font-size", "12pt")
-                  .text(p0 + ": " + d3.values(state)[0]);
-          detailCell.append("text")
-                  .style("text-anchor", "middle")
-                  .attr("transform", "translate(" + (twoDHeatMapWidth - shiftX*4) + "," + (y0 + shiftY*2) + ")")
-                  .attr("font-size", "12pt")
-                  .text(p1 + ": " + d3.values(state)[1]);
-
-          // time line curve
-          var data = [];
-          for (var i = 0; i < TimeStep; i++) {
-            data.push(d3.values(state)[i+2]);
-          }
-          //console.log(data);
-          var x = d3.scale.linear().domain([0, TimeStep]).range([x0, w*TimeStep + x0]);
-          var y = d3.scale.linear().domain([0, pMax]).range([h + y0, y0]);
-          var line = d3.svg.line()
-                  .x(function (d, i) { return x(i); })
-                  .y(function (d) { return y(d); });
-
-          var lineGraph = projectionTwoD.append("path").attr("transform", "translate(" + w/2 + ",0)");
-          lineGraph.attr("d", line(data)).attr("stroke", "black");
-
-          var boundray = projectionTwoD.append("rect")
-                  .attr("x", x0)
-                  .attr("y", y0)
-                  .attr("width", w*TimeStep)
-                  .attr("height", h)
-                  .attr("fill", "none")
-                  .attr("stroke", "black");
-
-          var closeButton = projectionTwoD.append("circle")
-                  .attr("cx", w*TimeStep + x0)
-                  .attr("cy", y0)
-                  .attr("r", 10)
-                  .attr("fill", "white")
-                  .attr("stroke", "black")
-                  .on("click", function () {
-                    show_detailTwoD = false;
-                    detailCell.remove();
-                    lineGraph.remove();
-                    boundray.remove();
-                    closeButton.remove();
-                  });
-        }
-
-        /************************************************************************************/
-        // display the 3rd protein curves
-        function draw3rdProteinCurve(data, pMax, time) {
-          var headerRow_twoD = Object.keys(data[0]);  // get keys from the first row
-          var xMax = d3.max(data, function (d) { return +d[headerRow_twoD[1]]; });
-          var yMax = d3.max(data, function (d) { return +d[headerRow_twoD[0]]; });
-
-          for (var i = 0; i <= yMax; i++) {
-            for (var j = 0; j <= xMax; j++) {
-
-            }
-          }
-        }
-        /*********************************************************************************************************************************************/
-        /*********************************************************************************************************************************************/
-
-        // find max prob in the entire file (over time)
-        var findMax = function (data, headerRow, shift) {
-          var max = 0;
-          for (var i = 0; i < Application.TimeStep; i++) {
-            var temp =  d3.max(data, function (d) { return +d[headerRow[i+shift]]; });
-            if (max < temp) {
-              max = temp;
-            }
-          }
-          return max;
-        }
-
-        // find peaks of each specie of proteins at current time
-        function findPeaks(data, rows, shift) {
-          var peaks = [];
-          var peak_num = 0;
-          if (+d3.values(data[0])[Application.currentTime+shift] >= +d3.values(data[1])[Application.currentTime+shift]) {
-            peaks.push(0);
-            peak_num++;
-          }
-          for (var i = 1; i <= rows-1; i++) {
-            var row_value_left = d3.values(data[i-1]);
-            var row_value_middle = d3.values(data[i]);
-            var row_value_right = d3.values(data[i+1]);
-            if (+row_value_middle[Application.currentTime+shift] >= +row_value_left[Application.currentTime+shift]
-                    && +row_value_middle[Application.currentTime+shift] >= +row_value_right[Application.currentTime+shift]) {
-              peaks.push(i);
-              peak_num++;
-            }
-          }
-          if (+d3.values(data[rows])[Application.currentTime+shift] >= +d3.values(data[rows-1])[Application.currentTime+shift]) {
-            peaks.push(rows);
-            peak_num++;
-          }
-          return peaks;
-          //return peak_num;
-        }
 
         /************************************************************************************/
         /************************************************************************************/
@@ -481,466 +144,421 @@
                 .await(loadAll);
 
         function loadAll(error, Pa_t20, Pb_t20, Pc_t20, Pab_t20, Pac_t20, Pbc_t20, Pabc_t20, States) {
-          if (error) {
-            console.log(error);
-          }
+            if (error) {
+                console.log(error);
+            }
 
-          var headerRow_threeD = Object.keys(Pabc_t20[0]);
-          //console.log(headerRow_threeD[0]);
-          //console.log(Pabc_t20.length);
+            var headerRow_states = Object.keys(States[0]);
+            var headerRow_oneD = Object.keys(Pa_t20[0]);  // get keys from the first row
+            var headerRow_twoD = Object.keys(Pab_t20[0]);  // get keys from the first row
+            var headerRow_threeD = Object.keys(Pabc_t20[0]);
 
-          var headerRow_states = Object.keys(States[0]);
-          //console.log(headerRow_states[0]);
+            var xMaxP = [];
+            xMaxP[0] = d3.max(Pa_t20, function (d) { return +d[headerRow_oneD[0]]; });
+            xMaxP[1] = d3.max(Pb_t20, function (d) { return +d[headerRow_oneD[0]]; });
+            xMaxP[2] = d3.max(Pc_t20, function (d) { return +d[headerRow_oneD[0]]; });
 
-          /************************************************************************************/
-          // draw oneD projections
-          var headerRow_oneD = Object.keys(Pa_t20[0]);  // get keys from the first row
-          //console.log(headerRow_oneD[0]);
+            var xMax_oneD = d3.max(xMaxP);
+            var yMax_oneD = d3.max([Application.utils.findMax(Pa_t20, headerRow_oneD, 1), Application.utils.findMax(Pc_t20, headerRow_oneD, 1), Application.utils.findMax(Pc_t20, headerRow_oneD, 1)]) + 0.01;
 
-          var xMaxP = [];
-          xMaxP[0] = d3.max(Pa_t20, function (d) { return +d[headerRow_oneD[0]]; });
-          xMaxP[1] = d3.max(Pb_t20, function (d) { return +d[headerRow_oneD[0]]; });
-          xMaxP[2] = d3.max(Pc_t20, function (d) { return +d[headerRow_oneD[0]]; });
-          console.log("xMaxP: " + xMaxP);
+            var probMax2D = d3.max([Application.utils.findMax(Pab_t20, headerRow_twoD, 2), Application.utils.findMax(Pac_t20, headerRow_twoD, 2), Application.utils.findMax(Pbc_t20, headerRow_twoD, 2)]) + 0.01;
+            var probMax3D = Application.utils.findMax(Pabc_t20, headerRow_threeD, 3);
 
-          var xMax_oneD = d3.max(xMaxP);
-          var yMax_oneD = d3.max([findMax(Pa_t20, headerRow_oneD, 1), findMax(Pc_t20, headerRow_oneD, 1), findMax(Pc_t20, headerRow_oneD, 1)]) + 0.01;
-          console.log("max x/y: " + [xMax_oneD, yMax_oneD]);
+            /************************************************************************************/
+            // control buttons to show/hide the views
+            var button1D = controlPanel.append("g").append("circle")
+                    .attr("cx", 20)
+                    .attr("cy", 19)
+                    .attr("r", 7)
+                    .attr("fill", "white")
+                    .attr("stroke", "black")
+                    .on("click", function () {
+                        if (Application.show_projectionOneD) {
+                            Application.show_projectionOneD = false;
+                        } else {
+                            Application.show_projectionOneD = true;
+                            Application.show_projectionTwoD = false;
+                            Application.show_projectionTwoD_Pab = false;
+                            Application.show_projectionTwoD_Pac = false;
+                            Application.show_projectionTwoD_Pbc = false;
+                            Application.show_projectionThreeD = false;
+                        }
+                        console.log("p1 Clicked!");
+                        console.log(Application.show_projectionOneD);
+                        showHide();
+                    });
 
-          var probMax3D = findMax(Pabc_t20, headerRow_threeD, 3);
-          //console.log(probMax3D);
+            var button2D = controlPanel.append("g").append("circle")
+                    .attr("cx", 20)
+                    .attr("cy", 19+25)
+                    .attr("r", 7)
+                    .attr("fill", "white")
+                    .attr("stroke", "black")
+                    .on("click", function () {
+                        if (Application.show_projectionTwoD) {
+                            Application.show_projectionTwoD = false;
+                            Application.show_projectionTwoD_Pab = false;
+                            Application.show_projectionTwoD_Pac = false;
+                            Application.show_projectionTwoD_Pbc = false;
+                            Application.show_detailTwoD = false;
+                        } else {
+                            Application.show_projectionOneD = false;
+                            Application.show_projectionTwoD = true;
+                            Application.show_projectionTwoD_Pab = true;
+                            Application.show_projectionTwoD_Pac = false;
+                            Application.show_projectionTwoD_Pbc = false;
+                            Application.show_detailTwoD = false;
+                            Application.show_projectionThreeD = false;
+                        }
+                        console.log("p2 Clicked!");
+                        console.log(Application.show_projectionTwoD);
+                        showHide();
+                    });
 
-          /************************************************************************************/
-          // draw peaks
-          function drawPeaks() {
-            var peaks_Pa = findPeaks(Pa_t20, xMaxP[0], 1);
-            var peaks_Pb = findPeaks(Pb_t20, xMaxP[1], 1);
-            var peaks_Pc = findPeaks(Pc_t20, xMaxP[2], 1);
-            console.log("peaks of Pa: " + peaks_Pa);
-            console.log("peaks of Pb: " + peaks_Pb);
-            console.log("peaks of Pc: " + peaks_Pc);
+            var button2D_ab = controlPanel.append("g").append("circle")
+                    .attr("cx", 40+7)
+                    .attr("cy", 19+25*2)
+                    .attr("r", 7)
+                    .attr("fill", "white")
+                    .attr("stroke", "black")
+                    .on("click", function () {
+                        if (Application.show_projectionTwoD_Pab) {
+                            Application.show_projectionTwoD_Pab = false;
+                        } else {
+                            Application.show_projectionOneD = false;
+                            Application.show_projectionTwoD = true;
+                            Application.show_projectionTwoD_Pab = true;
+                            Application.show_projectionTwoD_Pac = false;
+                            Application.show_projectionTwoD_Pbc = false;
+                            Application.show_detailTwoD = false;
+                            Application.show_projectionThreeD = false;
+                        }
+                        console.log("p2_ab Clicked!");
+                        console.log(Application.show_projectionTwoD);
+                        showHide();
+                    });
 
-            var peaks_num = peaks_Pa.length * peaks_Pb.length * peaks_Pc.length;
-            console.log("# of peaks: " + peaks_num);
-            var length = Math.min(Application.main_width*2/5 - Application.shiftX*5, (Application.main_height - Application.shiftY*(peaks_num+1)) / peaks_num);
-            var xPos = Application.shiftX*2;
-            var yPos = 0;
+            var button2D_ac = controlPanel.append("g").append("circle")
+                    .attr("cx", 40+7)
+                    .attr("cy", 19+25*3)
+                    .attr("r", 7)
+                    .attr("fill", "white")
+                    .attr("stroke", "black")
+                    .on("click", function () {
+                        if (Application.show_projectionTwoD_Pac) {
+                            Application.show_projectionTwoD_Pac = false;
+                        } else {
+                            Application.show_projectionOneD = false;
+                            Application.show_projectionTwoD = true;
+                            Application.show_projectionTwoD_Pab = false;
+                            Application.show_projectionTwoD_Pac = true;
+                            Application.show_projectionTwoD_Pbc = false;
+                            Application.show_detailTwoD = false;
+                            Application.show_projectionThreeD = false;
+                        }
+                        console.log("p2_ac Clicked!");
+                        console.log(Application.show_projectionTwoD);
+                        showHide();
+                    });
 
-            for (var i = 0; i < peaks_Pa.length; i++) {
-              for (var j = 0; j < peaks_Pb.length; j++) {
-                for (var k = 0; k < peaks_Pc.length; k++) {
-                  var peaks = [];
-                  peaks.push(peaks_Pa[i]);
-                  peaks.push(peaks_Pb[j]);
-                  peaks.push(peaks_Pc[k]);
-                  var fillColor; // = d3.hsl(20, 0.9, 0.55);
-                  for (var r = 0; r < Pabc_t20.length; r++) {
-                    var row = d3.values(Pabc_t20[r]);
-                    if (peaks_Pa[i] == row[0] && peaks_Pb[j] == row[1] && peaks_Pc[k] == row[2]) {
-                      fillColor = d3.hsl(20, 0.5+0.45*row[Application.currentTime+3]/probMax3D, 0.5+0.45*(probMax3D-row[Application.currentTime+3])/probMax3D);
-                      break;
-                    }
-                  }
-                  Application.oneDV.drawLocation(xPos, yPos + (Application.shiftY+length)*k, length, peaks, xMaxP, fillColor);
+            var button2D_bc = controlPanel.append("g").append("circle")
+                    .attr("cx", 40+7)
+                    .attr("cy", 19+25*4)
+                    .attr("r", 7)
+                    .attr("fill", "white")
+                    .attr("stroke", "black")
+                    .on("click", function () {
+                        if (Application.show_projectionTwoD_Pbc) {
+                            Application.show_projectionTwoD_Pbc = false;
+                        } else {
+                            Application.show_projectionOneD = false;
+                            Application.show_projectionTwoD = true;
+                            Application.show_projectionTwoD_Pab = false;
+                            Application.show_projectionTwoD_Pac = false;
+                            Application.show_projectionTwoD_Pbc = true;
+                            Application.show_detailTwoD = false;
+                            Application.show_projectionThreeD = false;
+                        }
+                        console.log("p2_bc Clicked!");
+                        console.log(Application.show_projectionTwoD);
+                        showHide();
+                    });
+
+            var button2D_time = controlPanel.append("g").append("circle")
+                    .attr("cx", 40+7)
+                    .attr("cy", 19+25*5)
+                    .attr("r", 7)
+                    .attr("fill", "white")
+                    .attr("stroke", "black")
+                    .on("click", function () {
+                        if (Application.show_projectionTwoD_time) {
+                            Application.show_projectionTwoD_time = false;
+                        } else {
+                            Application.show_projectionTwoD_time = true;
+                            Application.show_projectionTwoD_3rdP = false;
+                            Application.show_detailTwoD = false;
+                            Application.show_projectionTwoD = true;
+                        }
+                        console.log("p2_time Clicked!");
+                        console.log(Application.show_projectionTwoD_time);
+                        showHide();
+                    });
+
+            var button2D_3rdP = controlPanel.append("g").append("circle")
+                    .attr("cx", 40+7)
+                    .attr("cy", 19+25*6)
+                    .attr("r", 7)
+                    .attr("fill", "white")
+                    .attr("stroke", "black")
+                    .on("click", function () {
+                        if (Application.show_projectionTwoD_3rdP) {
+                            Application.show_projectionTwoD_3rdP = false;
+                        } else {
+                            Application.show_projectionTwoD_time = false;
+                            Application.show_projectionTwoD_3rdP = true;
+                            Application.show_projectionTwoD = true;
+                        }
+                        console.log("p2_3rdP Clicked!");
+                        console.log(Application.show_projectionTwoD_3rdP);
+                        showHide();
+                    });
+
+            var button3D = controlPanel.append("g").append("circle")
+                    .attr("cx", 20)
+                    .attr("cy", 19+25*7)
+                    .attr("r", 7)
+                    .attr("fill", "white")
+                    .attr("stroke", "black")
+                    .on("click", function () {
+                        if (Application.show_projectionThreeD) {
+                            Application.show_projectionThreeD = false;
+                        } else {
+                            Application.show_projectionOneD = false;
+                            Application.show_projectionTwoD = false;
+                            Application.show_projectionTwoD_Pab = false;
+                            Application.show_projectionTwoD_Pac = false;
+                            Application.show_projectionTwoD_Pbc = false;
+                            Application.show_detailTwoD = false;
+                            Application.show_projectionThreeD = true;
+                        }
+                        console.log("p3 Clicked!");
+                        console.log(Application.show_projectionThreeD);
+                        showHide();
+                    });
+
+            var buttonPeak = controlPanel.append("g").append("circle")
+                    .attr("cx", 20)
+                    .attr("cy", 19+25*9)
+                    .attr("r", 7)
+                    .attr("fill", "white")
+                    .attr("stroke", "black")
+                    .on("click", function () {
+                        if (Application.show_peaks) {
+                            Application.show_peaks = false;
+                        } else {
+                            Application.show_peaks = true;
+                            Application.clickedPaIndex = -1;
+                            Application.clickedPbIndex = -1;
+                            Application.clickedPcIndex = -1;
+                        }
+                        console.log("peaks Clicked!");
+                        console.log(Application.show_peaks);
+                        showHide();
+                    });
+
+            /************************************************************************************/
+            // time slider
+            var startingTime = 0;
+            var timeX = d3.scale.linear().domain([0, Application.TimeStep-1]).range([0, controlPanel_width - Application.margin*2]).clamp(true);
+            var brush = d3.svg.brush().x(timeX).extent([startingTime, startingTime]).on("brush", brushed);
+            var timeBar = controlPanel.append("g")
+                    .attr("transform", "translate(" + Application.margin + "," + (25+25*11) + ")")
+                    .attr("class", "x time_axis")
+                    .call(d3.svg.axis()
+                            .scale(timeX)
+                            .orient("bottom")
+                            .tickFormat(function (d) { return d; })
+                            .tickSize(0)
+                            .tickPadding(12));
+            //.select(".domain")
+            //.select(function () { console.log(this); return this.parentNode.appendChild(this.cloneNode(true)); })
+            //.attr("class", "halo");
+
+            var timeSlider = timeBar.append("g")
+                    .attr("class", "slider")
+                    .call(brush);
+            timeSlider.selectAll(".extent,.resize").remove();
+            timeSlider.select(".background").attr("height", 60);
+
+            var handle = timeSlider.append("g").attr("class", "handle");
+            handle.append("circle")
+                    .attr("r", 7)
+                    .attr("fill", "white");
+            handle.append("text")
+                    .attr("transform", "translate(0," + (-10) + ")")
+                    .style("text-align", "center")
+                    .attr("font-size", "10pt")
+                    .attr("fill", "black")
+                    .text(startingTime);
+
+            timeSlider.call(brush.event);
+
+            function brushed() {
+                var value = brush.extent()[0];
+                if (d3.event.sourceEvent) {
+                    value = timeX.invert(d3.mouse(this)[0]);
+                    brush.extent([value, value]);
                 }
-              }
+                if (value - Math.floor(value) < 0.5) {
+                    value = Math.floor(value);
+                } else {
+                    value = Math.ceil(value);
+                }
+                console.log("time: " + value);
+                handle.attr("transform", "translate(" + timeX(value) + ",0)");
+                handle.select("text").text(value).attr("transform", "translate(0," + (-10) + ")");
+
+                Application.currentTime = value;
+                showHide();
             }
-          }
 
-          /************************************************************************************/
-          // draw twoD projections
-          var headerRow_twoD = Object.keys(Pab_t20[0]);  // get keys from the first row
-          //console.log(headerRow_twoD[0]);
+            /************************************************************************************/
+            function showHide() {
+                if (Application.show_projectionOneD) {
+                    button1D.attr("fill", "black");
+                    button2D.attr("fill", "white");
+                    button2D_ab.attr("fill", "white");
+                    button2D_ac.attr("fill", "white");
+                    button2D_bc.attr("fill", "white");
+                    button3D.attr("fill", "white");
 
-          var probMax2D = d3.max([findMax(Pab_t20, headerRow_twoD, 2), findMax(Pac_t20, headerRow_twoD, 2), findMax(Pbc_t20, headerRow_twoD, 2)]) + 0.01;
+                    Application.oneDV.getProjection().selectAll("*").remove();
+                    Application.twoDV.getProjection().selectAll("*").remove();
+                    Application.oneDV.drawAxis(xMax_oneD, yMax_oneD);  // draw X/Y-axis
+                    Application.oneDV.renderLineGraphs(Pa_t20, Pb_t20, Pc_t20, headerRow_oneD);
+                    Application.oneDV.renderOneDHeatMaps(Pa_t20, Pb_t20, Pc_t20, Pabc_t20, headerRow_oneD, probMax3D, xMaxP, xMax_oneD, yMax_oneD);
 
-          /************************************************************************************/
-          // control buttons to show/hide the views
-          var button1D = controlPanel.append("g").append("circle")
-                  .attr("cx", 20)
-                  .attr("cy", 19)
-                  .attr("r", 7)
-                  .attr("fill", "white")
-                  .attr("stroke", "black")
-                  .on("click", function () {
-                    if (show_projectionOneD) {
-                      show_projectionOneD = false;
+                    if (Application.show_peaks) {
+                        buttonPeak.attr("fill", "black");
+                        Application.oneDV.getPeaks().selectAll("*").remove();
+                        Application.twoDV.drawPeaks(Pa_t20, Pb_t20, Pc_t20, Pabc_t20, xMaxP, probMax3D);
                     } else {
-                      show_projectionOneD = true;
-                      show_projectionTwoD = false;
-                      show_projectionTwoD_Pab = false;
-                      show_projectionTwoD_Pac = false;
-                      show_projectionTwoD_Pbc = false;
-                      show_projectionThreeD = false;
+                        buttonPeak.attr("fill", "white");
+                        Application.oneDV.getPeaks().selectAll("*").remove();
                     }
-                    console.log("p1 Clicked!");
-                    console.log(show_projectionOneD);
-                    showHide();
-                  });
+                } else if (Application.show_projectionTwoD_Pab && Application.show_projectionTwoD) {
+                    button1D.attr("fill", "white");
+                    button2D.attr("fill", "black");
+                    button2D_ab.attr("fill", "black");
+                    button2D_ac.attr("fill", "white");
+                    button2D_bc.attr("fill", "white");
+                    button3D.attr("fill", "white");
 
-          var button2D = controlPanel.append("g").append("circle")
-                  .attr("cx", 20)
-                  .attr("cy", 19+25)
-                  .attr("r", 7)
-                  .attr("fill", "white")
-                  .attr("stroke", "black")
-                  .on("click", function () {
-                    if (show_projectionTwoD) {
-                      show_projectionTwoD = false;
-                      show_projectionTwoD_Pab = false;
-                      show_projectionTwoD_Pac = false;
-                      show_projectionTwoD_Pbc = false;
-                      show_detailTwoD = false;
+                    Application.oneDV.getProjection().selectAll("*").remove();
+                    Application.oneDV.getPeaks().selectAll("*").remove();
+                    Application.twoDV.getProjection().selectAll("*").remove();
+                    Application.twoDV.draw2DHeatMap(Pab_t20, probMax2D, Application.currentTime, Pabc_t20);
+
+                    if (Application.show_peaks) {
+                        buttonPeak.attr("fill", "black");
                     } else {
-                      show_projectionOneD = false;
-                      show_projectionTwoD = true;
-                      show_projectionTwoD_Pab = true;
-                      show_projectionTwoD_Pac = false;
-                      show_projectionTwoD_Pbc = false;
-                      show_detailTwoD = false;
-                      show_projectionThreeD = false;
+                        buttonPeak.attr("fill", "white");
                     }
-                    console.log("p2 Clicked!");
-                    console.log(show_projectionTwoD);
-                    showHide();
-                  });
-
-          var button2D_ab = controlPanel.append("g").append("circle")
-                  .attr("cx", 40+7)
-                  .attr("cy", 19+25*2)
-                  .attr("r", 7)
-                  .attr("fill", "white")
-                  .attr("stroke", "black")
-                  .on("click", function () {
-                    if (show_projectionTwoD_Pab) {
-                      show_projectionTwoD_Pab = false;
+                    if (Application.show_projectionTwoD_time) {
+                        button2D_time.attr("fill", "black");
                     } else {
-                      show_projectionOneD = false;
-                      show_projectionTwoD = true;
-                      show_projectionTwoD_Pab = true;
-                      show_projectionTwoD_Pac = false;
-                      show_projectionTwoD_Pbc = false;
-                      show_detailTwoD = false;
-                      show_projectionThreeD = false;
+                        button2D_time.attr("fill", "white");
                     }
-                    console.log("p2_ab Clicked!");
-                    console.log(show_projectionTwoD);
-                    showHide();
-                  });
-
-          var button2D_ac = controlPanel.append("g").append("circle")
-                  .attr("cx", 40+7)
-                  .attr("cy", 19+25*3)
-                  .attr("r", 7)
-                  .attr("fill", "white")
-                  .attr("stroke", "black")
-                  .on("click", function () {
-                    if (show_projectionTwoD_Pac) {
-                      show_projectionTwoD_Pac = false;
+                    if (Application.show_projectionTwoD_3rdP) {
+                        button2D_3rdP.attr("fill", "black");
                     } else {
-                      show_projectionOneD = false;
-                      show_projectionTwoD = true;
-                      show_projectionTwoD_Pab = false;
-                      show_projectionTwoD_Pac = true;
-                      show_projectionTwoD_Pbc = false;
-                      show_detailTwoD = false;
-                      show_projectionThreeD = false;
+                        button2D_3rdP.attr("fill", "white");
                     }
-                    console.log("p2_ac Clicked!");
-                    console.log(show_projectionTwoD);
-                    showHide();
-                  });
+                } else if (Application.show_projectionTwoD_Pac && Application.show_projectionTwoD) {
+                    button1D.attr("fill", "white");
+                    button2D.attr("fill", "black");
+                    button2D_ab.attr("fill", "white");
+                    button2D_ac.attr("fill", "black");
+                    button2D_bc.attr("fill", "white");
+                    button3D.attr("fill", "white");
 
-          var button2D_bc = controlPanel.append("g").append("circle")
-                  .attr("cx", 40+7)
-                  .attr("cy", 19+25*4)
-                  .attr("r", 7)
-                  .attr("fill", "white")
-                  .attr("stroke", "black")
-                  .on("click", function () {
-                    if (show_projectionTwoD_Pbc) {
-                      show_projectionTwoD_Pbc = false;
+                    Application.oneDV.getProjection().selectAll("*").remove();
+                    Application.oneDV.getPeaks().selectAll("*").remove();
+                    Application.twoDV.getProjection().selectAll("*").remove();
+                    Application.twoDV.draw2DHeatMap(Pac_t20, probMax2D, Application.currentTime, Pabc_t20);
+
+                    if (Application.show_peaks) {
+                        buttonPeak.attr("fill", "black");
                     } else {
-                      show_projectionOneD = false;
-                      show_projectionTwoD = true;
-                      show_projectionTwoD_Pab = false;
-                      show_projectionTwoD_Pac = false;
-                      show_projectionTwoD_Pbc = true;
-                      show_detailTwoD = false;
-                      show_projectionThreeD = false;
+                        buttonPeak.attr("fill", "white");
                     }
-                    console.log("p2_bc Clicked!");
-                    console.log(show_projectionTwoD);
-                    showHide();
-                  });
-
-          var button2D_time = controlPanel.append("g").append("circle")
-                  .attr("cx", 40+7)
-                  .attr("cy", 19+25*5)
-                  .attr("r", 7)
-                  .attr("fill", "white")
-                  .attr("stroke", "black")
-                  .on("click", function () {
-                    if (show_projectionTwoD_time) {
-                      show_projectionTwoD_time = false;
+                    if (Application.show_projectionTwoD_time) {
+                        button2D_time.attr("fill", "black");
                     } else {
-                      show_projectionTwoD_time = true;
-                      show_projectionTwoD_3rdP = false;
-                      show_detailTwoD = false;
-                      show_projectionTwoD = true;
+                        button2D_time.attr("fill", "white");
                     }
-                    console.log("p2_time Clicked!");
-                    console.log(show_projectionTwoD_time);
-                    showHide();
-                  });
-
-          var button2D_3rdP = controlPanel.append("g").append("circle")
-                  .attr("cx", 40+7)
-                  .attr("cy", 19+25*6)
-                  .attr("r", 7)
-                  .attr("fill", "white")
-                  .attr("stroke", "black")
-                  .on("click", function () {
-                    if (show_projectionTwoD_3rdP) {
-                      show_projectionTwoD_3rdP = false;
+                    if (Application.show_projectionTwoD_3rdP) {
+                        button2D_3rdP.attr("fill", "black");
                     } else {
-                      show_projectionTwoD_time = false;
-                      show_projectionTwoD_3rdP = true;
-                      show_projectionTwoD = true;
+                        button2D_3rdP.attr("fill", "white");
                     }
-                    console.log("p2_3rdP Clicked!");
-                    console.log(show_projectionTwoD_3rdP);
-                    showHide();
-                  });
+                } else if (Application.show_projectionTwoD_Pbc && Application.show_projectionTwoD) {
+                    button1D.attr("fill", "white");
+                    button2D.attr("fill", "black");
+                    button2D_ab.attr("fill", "white");
+                    button2D_ac.attr("fill", "white");
+                    button2D_bc.attr("fill", "black");
+                    button3D.attr("fill", "white");
 
-          var button3D = controlPanel.append("g").append("circle")
-                  .attr("cx", 20)
-                  .attr("cy", 19+25*7)
-                  .attr("r", 7)
-                  .attr("fill", "white")
-                  .attr("stroke", "black")
-                  .on("click", function () {
-                    if (show_projectionThreeD) {
-                      show_projectionThreeD = false;
+                    Application.oneDV.getProjection().selectAll("*").remove();
+                    Application.oneDV.getPeaks().selectAll("*").remove();
+                    Application.twoDV.getProjection().selectAll("*").remove();
+                    Application.twoDV.draw2DHeatMap(Pbc_t20, probMax2D, Application.currentTime, Pabc_t20);
+
+                    if (Application.show_peaks) {
+                        buttonPeak.attr("fill", "black");
                     } else {
-                      show_projectionOneD = false;
-                      show_projectionTwoD = false;
-                      show_projectionTwoD_Pab = false;
-                      show_projectionTwoD_Pac = false;
-                      show_projectionTwoD_Pbc = false;
-                      show_detailTwoD = false;
-                      show_projectionThreeD = true;
+                        buttonPeak.attr("fill", "white");
                     }
-                    console.log("p3 Clicked!");
-                    console.log(show_projectionThreeD);
-                    showHide();
-                  });
-
-          var buttonPeak = controlPanel.append("g").append("circle")
-                  .attr("cx", 20)
-                  .attr("cy", 19+25*9)
-                  .attr("r", 7)
-                  .attr("fill", "white")
-                  .attr("stroke", "black")
-                  .on("click", function () {
-                    if (show_peaks) {
-                      show_peaks = false;
+                    if (Application.show_projectionTwoD_time) {
+                        button2D_time.attr("fill", "black");
                     } else {
-                      show_peaks = true;
-                      clickedPaIndex = -1;
-                      clickedPbIndex = -1;
-                      clickedPcIndex = -1;
+                        button2D_time.attr("fill", "white");
                     }
-                    console.log("peaks Clicked!");
-                    console.log(show_peaks);
-                    showHide();
-                  });
-
-          /************************************************************************************/
-          // time slider
-          var startingTime = 0;
-          var timeX = d3.scale.linear().domain([0, Application.TimeStep-1]).range([0, controlPanel_width - Application.margin*2]).clamp(true);
-          var brush = d3.svg.brush().x(timeX).extent([startingTime, startingTime]).on("brush", brushed);
-          var timeBar = controlPanel.append("g")
-                  .attr("transform", "translate(" + Application.margin + "," + (25+25*11) + ")")
-                  .attr("class", "x time_axis")
-                  .call(d3.svg.axis()
-                          .scale(timeX)
-                          .orient("bottom")
-                          .tickFormat(function (d) { return d; })
-                          .tickSize(0)
-                          .tickPadding(12));
-          //.select(".domain")
-          //.select(function () { console.log(this); return this.parentNode.appendChild(this.cloneNode(true)); })
-          //.attr("class", "halo");
-
-          var timeSlider = timeBar.append("g")
-                  .attr("class", "slider")
-                  .call(brush);
-          timeSlider.selectAll(".extent,.resize").remove();
-          timeSlider.select(".background").attr("height", 60);
-
-          var handle = timeSlider.append("g").attr("class", "handle");
-          handle.append("circle")
-                  .attr("r", 7)
-                  .attr("fill", "white");
-          handle.append("text")
-                  .attr("transform", "translate(0," + (-10) + ")")
-                  .style("text-align", "center")
-                  .attr("font-size", "10pt")
-                  .attr("fill", "black")
-                  .text(startingTime);
-
-          timeSlider.call(brush.event);
-
-          function brushed() {
-            var value = brush.extent()[0];
-            if (d3.event.sourceEvent) {
-              value = timeX.invert(d3.mouse(this)[0]);
-              brush.extent([value, value]);
+                    if (Application.show_projectionTwoD_3rdP) {
+                        button2D_3rdP.attr("fill", "black");
+                    } else {
+                        button2D_3rdP.attr("fill", "white");
+                    }
+                } else if (Application.show_projectionThreeD) {
+                    button1D.attr("fill", "white");
+                    button2D.attr("fill", "white");
+                    button2D_ab.attr("fill", "white");
+                    button2D_ac.attr("fill", "white");
+                    button2D_bc.attr("fill", "white");
+                    button3D.attr("fill", "black");
+                    Application.oneDV.getProjection().selectAll("*").remove();
+                    Application.oneDV.getPeaks().selectAll("*").remove();
+                    Application.twoDV.getProjection().selectAll("*").remove();
+                    if (Application.show_peaks) {
+                        buttonPeak.attr("fill", "black");
+                    } else {
+                        buttonPeak.attr("fill", "white");
+                    }
+                } else {
+                    button1D.attr("fill", "white");
+                    button2D.attr("fill", "white");
+                    button2D_ab.attr("fill", "white");
+                    button2D_ac.attr("fill", "white");
+                    button2D_bc.attr("fill", "white");
+                    button3D.attr("fill", "white");
+                    Application.oneDV.getProjection().selectAll("*").remove();
+                    Application.oneDV.getPeaks().selectAll("*").remove();
+                    Application.twoDV.getProjection().selectAll("*").remove();
+                }
             }
-            if (value - Math.floor(value) < 0.5) {
-              value = Math.floor(value);
-            } else {
-              value = Math.ceil(value);
-            }
-            console.log("time: " + value);
-            handle.attr("transform", "translate(" + timeX(value) + ",0)");
-            handle.select("text").text(value).attr("transform", "translate(0," + (-10) + ")");
 
-            Application.currentTime = value;
             showHide();
-          }
-
-          /************************************************************************************/
-          function showHide() {
-            if (show_projectionOneD) {
-              button1D.attr("fill", "black");
-              button2D.attr("fill", "white");
-              button2D_ab.attr("fill", "white");
-              button2D_ac.attr("fill", "white");
-              button2D_bc.attr("fill", "white");
-              button3D.attr("fill", "white");
-              Application.oneDV.getProjection().selectAll("*").remove();
-              projectionTwoD.selectAll("*").remove();
-              Application.oneDV.drawAxis(xMax_oneD, yMax_oneD);  // draw X/Y-axis
-              Application.oneDV.renderLineGraphs(Pa_t20, Pb_t20, Pc_t20, headerRow_oneD);
-              Application.oneDV.renderOneDHeatMaps(Pa_t20, Pb_t20, Pc_t20, Pabc_t20, headerRow_oneD, probMax3D, xMaxP, xMax_oneD, yMax_oneD);
-              if (show_peaks) {
-                buttonPeak.attr("fill", "black");
-                Application.oneDV.getPeaks().selectAll("*").remove();
-                drawPeaks();
-              } else {
-                buttonPeak.attr("fill", "white");
-                Application.oneDV.getPeaks().selectAll("*").remove();
-              }
-            } else if (show_projectionTwoD_Pab && show_projectionTwoD) {
-              button1D.attr("fill", "white");
-              button2D.attr("fill", "black");
-              button2D_ab.attr("fill", "black");
-              button2D_ac.attr("fill", "white");
-              button2D_bc.attr("fill", "white");
-              button3D.attr("fill", "white");
-              Application.oneDV.getProjection().selectAll("*").remove();
-              Application.oneDV.getPeaks().selectAll("*").remove();
-              projectionTwoD.selectAll("*").remove();
-              draw2DHeatMap(Pab_t20, probMax2D, Application.currentTime, Pabc_t20);
-              if (show_peaks) {
-                buttonPeak.attr("fill", "black");
-              } else {
-                buttonPeak.attr("fill", "white");
-              }
-              if (show_projectionTwoD_time) {
-                button2D_time.attr("fill", "black");
-              } else {
-                button2D_time.attr("fill", "white");
-              }
-              if (show_projectionTwoD_3rdP) {
-                button2D_3rdP.attr("fill", "black");
-              } else {
-                button2D_3rdP.attr("fill", "white");
-              }
-            } else if (show_projectionTwoD_Pac && show_projectionTwoD) {
-              button1D.attr("fill", "white");
-              button2D.attr("fill", "black");
-              button2D_ab.attr("fill", "white");
-              button2D_ac.attr("fill", "black");
-              button2D_bc.attr("fill", "white");
-              button3D.attr("fill", "white");
-              Application.oneDV.getProjection().selectAll("*").remove();
-              Application.oneDV.getPeaks().selectAll("*").remove();
-              projectionTwoD.selectAll("*").remove();
-              draw2DHeatMap(Pac_t20, probMax2D, Application.currentTime, Pabc_t20);
-              if (show_peaks) {
-                buttonPeak.attr("fill", "black");
-              } else {
-                buttonPeak.attr("fill", "white");
-              }
-              if (show_projectionTwoD_time) {
-                button2D_time.attr("fill", "black");
-              } else {
-                button2D_time.attr("fill", "white");
-              }
-              if (show_projectionTwoD_3rdP) {
-                button2D_3rdP.attr("fill", "black");
-              } else {
-                button2D_3rdP.attr("fill", "white");
-              }
-            } else if (show_projectionTwoD_Pbc && show_projectionTwoD) {
-              button1D.attr("fill", "white");
-              button2D.attr("fill", "black");
-              button2D_ab.attr("fill", "white");
-              button2D_ac.attr("fill", "white");
-              button2D_bc.attr("fill", "black");
-              button3D.attr("fill", "white");
-              Application.oneDV.getProjection().selectAll("*").remove();
-              Application.oneDV.getPeaks().selectAll("*").remove();
-              projectionTwoD.selectAll("*").remove();
-              draw2DHeatMap(Pbc_t20, probMax2D, Application.currentTime, Pabc_t20);
-              if (show_peaks) {
-                buttonPeak.attr("fill", "black");
-              } else {
-                buttonPeak.attr("fill", "white");
-              }
-              if (show_projectionTwoD_time) {
-                button2D_time.attr("fill", "black");
-              } else {
-                button2D_time.attr("fill", "white");
-              }
-              if (show_projectionTwoD_3rdP) {
-                button2D_3rdP.attr("fill", "black");
-              } else {
-                button2D_3rdP.attr("fill", "white");
-              }
-            } else if (show_projectionThreeD) {
-              button1D.attr("fill", "white");
-              button2D.attr("fill", "white");
-              button2D_ab.attr("fill", "white");
-              button2D_ac.attr("fill", "white");
-              button2D_bc.attr("fill", "white");
-              button3D.attr("fill", "black");
-              Application.oneDV.getProjection().selectAll("*").remove();
-              Application.oneDV.getPeaks().selectAll("*").remove();
-              projectionTwoD.selectAll("*").remove();
-              if (show_peaks) {
-                buttonPeak.attr("fill", "black");
-              } else {
-                buttonPeak.attr("fill", "white");
-              }
-            } else {
-              button1D.attr("fill", "white");
-              button2D.attr("fill", "white");
-              button2D_ab.attr("fill", "white");
-              button2D_ac.attr("fill", "white");
-              button2D_bc.attr("fill", "white");
-              button3D.attr("fill", "white");
-              Application.oneDV.getProjection().selectAll("*").remove();
-              Application.oneDV.getPeaks().selectAll("*").remove();
-              projectionTwoD.selectAll("*").remove();
-            }
-          }
-
-          showHide();
 
         }  // end - loadAll()
 
@@ -964,8 +582,8 @@
          //drawHeatMaps(dataset);
          });*/
 
-      }
-      /************************************************************************************/
-    </script>
-  </body>
+    }
+    /************************************************************************************/
+</script>
+</body>
 </html>
