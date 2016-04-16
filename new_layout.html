@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Test</title>
+    <!-- Stylesheets-->
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="src/css/main.css">
+
+    <!-- Libraries-->
+    <script   src="https://code.jquery.com/jquery-2.2.3.min.js"
+              integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo="
+              crossorigin="anonymous"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+    <script src="http://d3js.org/queue.v1.min.js"></script>
+
+    <!-- Source -->
+    <script src="src/js/main.js"></script>
+    <script src="src/js/utils.js"></script>
+
+    <script src="src/js/visualizations/one_dimension.js"></script>
+    <script src="src/js/visualizations/two_dimension.js"></script>
+    <script src="src/js/visualizations/third_dimension.js"></script>
+
+</head>
+<body onload="start()">
+<div class="container-fluid">
+
+    <div class="row">
+        <div class="col-md-4">
+            <svg id="timeSlider"></svg>
+        </div>
+        <div class="col-lg-4">
+            <svg id="probability"></svg>
+        </div>
+        <div class="col-md-4">
+            <svg id="distribution1D"></svg>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-4">.col-sm-4</div>
+        <div class="col-sm-4">.col-sm-4</div>
+        <div class="col-sm-4">.col-sm-4</div>
+    </div>
+
+</div>
+
+<script>
+
+    /************************************************************************************/
+    function start() {
+
+        var svg = d3.select("#probability")
+                .attr("width", Application.outerWidth)
+                .attr("height", Application.outerHeight);
+
+        // draw boundary of the entire view
+//        var entire_view = svg.append("rect")
+//                .attr("x", 0)
+//                .attr("y", 0)
+//                .attr("width", Application.outerWidth)
+//                .attr("height", Application.outerHeight)
+//                .attr("fill", "none")
+//                .attr("stroke", "black");
+
+        var controlPanel_width = (Application.outerWidth - Application.margin*3) / 6;
+        var controlPanel_height = Application.outerHeight - Application.margin*2;
+
+        var slider = d3.select("#timeSlider")
+                .attr("width", controlPanel_width)
+                .attr("height",controlPanel_height);
+        //var controlPanel = svg.append("g").attr("transform", "translate(" + Application.margin + "," + Application.margin + ")");
+//
+//        var controlPanel_view = controlPanel.append("rect")
+//                .attr("x", 0)
+//                .attr("y", 0)
+//                .attr("width", controlPanel_width)
+//                .attr("height", controlPanel_height)
+//                .attr("fill", "none")
+//                .attr("stroke", "black");
+//
+//        var button1_text = controlPanel.append("text")
+//                .style("text-anchor", "left")
+//                .attr("transform", "translate(" + 40 + "," + 25 + ")")
+//                .attr("font-size", "14pt")
+//                .text("1D Projecions");
+//
+//        var button2_text = controlPanel.append("text")
+//                .style("text-anchor", "left")
+//                .attr("transform", "translate(" + 40 + "," + (25+25) + ")")
+//                .attr("font-size", "14pt")
+//                .text("2D Projecions");
+//        var button2_ab_text = controlPanel.append("text")
+//                .style("text-anchor", "left")
+//                .attr("transform", "translate(" + (40+27) + "," + (25+25*2) + ")")
+//                .attr("font-size", "14pt")
+//                .text("Protein A vs. B");
+//        var button2_ac_text = controlPanel.append("text")
+//                .style("text-anchor", "left")
+//                .attr("transform", "translate(" + (40+27) + "," + (25+25*3) + ")")
+//                .attr("font-size", "14pt")
+//                .text("Protein A vs. C");
+//        var button2_bc_text = controlPanel.append("text")
+//                .style("text-anchor", "left")
+//                .attr("transform", "translate(" + (40+27) + "," + (25+25*4) + ")")
+//                .attr("font-size", "14pt")
+//                .text("Protein B vs. C");
+//
+//        var button2_time_text = controlPanel.append("text")
+//                .style("text-anchor", "left")
+//                .attr("transform", "translate(" + (40+27) + "," + (25+25*5) + ")")
+//                .attr("font-size", "14pt")
+//                .text("Show Time Curves");
+//        var button2_3rdP_text = controlPanel.append("text")
+//                .style("text-anchor", "left")
+//                .attr("transform", "translate(" + (40+27) + "," + (25+25*6) + ")")
+//                .attr("font-size", "14pt")
+//                .text("Show the 3rd Protein");
+//
+//        var button3_text = controlPanel.append("text")
+//                .style("text-anchor", "left")
+//                .attr("transform", "translate(" + 40 + "," + (25+25*7) + ")")
+//                .attr("font-size", "14pt")
+//                .text("3D Projecion");
+//
+//        var buttonPeak_text = controlPanel.append("text")
+//                .style("text-anchor", "left")
+//                .attr("transform", "translate(" + 40 + "," + (25+25*9) + ")")
+//                .attr("font-size", "14pt")
+//                .text("Show Peaks");
+
+        /************************************************************************************/
+
+        var main = svg.append("g");
+     //           .attr("transform", "translate(" + (controlPanel_width + Application.margin*2) + "," + Application.margin + ")");
+
+//        main.append("rect")
+//                .attr("x", 0)
+//                .attr("y", 0)
+//                .attr("width", Application.main_width)
+//                .attr("height", Application.main_height)
+//                .attr("fill", "none")
+//                .attr("stroke", "black");
+
+        /************************************************************************************/
+        // 1D projection
+
+        Application.oneDV.initialize(main);
+        Application.twoDV.initialize(main);
+
+        /************************************************************************************/
+        /************************************************************************************/
+        // load multiple files and draw
+        queue()
+        /*.defer(d3.csv, "http://localhost:8080/Desktop/BioinformaticsVis/D3/Pa_t0-20.csv")
+         .defer(d3.csv, "http://localhost:8080/Desktop/BioinformaticsVis/D3/Pb_t0-20.csv")
+         .defer(d3.csv, "http://localhost:8080/Desktop/BioinformaticsVis/D3/Pc_t0-20.csv")
+         .defer(d3.csv, "http://localhost:8080/Desktop/BioinformaticsVis/D3/Pab_t0-20.csv")
+         .defer(d3.csv, "http://localhost:8080/Desktop/BioinformaticsVis/D3/Pac_t0-20.csv")
+         .defer(d3.csv, "http://localhost:8080/Desktop/BioinformaticsVis/D3/Pbc_t0-20.csv")
+         .defer(d3.csv, "http://localhost:8080/Desktop/BioinformaticsVis/D3/Pabc_t0-20.csv")
+         .defer(d3.csv, "http://localhost:8080/Desktop/BioinformaticsVis/D3/state_space.csv")
+         */
+                .defer(d3.csv, "Pa_t0-20.csv")
+                .defer(d3.csv, "Pb_t0-20.csv")
+                .defer(d3.csv, "Pc_t0-20.csv")
+                .defer(d3.csv, "Pab_t0-20.csv")
+                .defer(d3.csv, "Pac_t0-20.csv")
+                .defer(d3.csv, "Pbc_t0-20.csv")
+                .defer(d3.csv, "Pabc_t0-20.csv")
+                .defer(d3.csv, "state_space.csv")
+                .await(loadAll);
+
+        function loadAll(error, Pa_t20, Pb_t20, Pc_t20, Pab_t20, Pac_t20, Pbc_t20, Pabc_t20, States) {
+            if (error) {
+                console.log(error);
+            }
+
+            var headerRow_states = Object.keys(States[0]);
+            var headerRow_oneD = Object.keys(Pa_t20[0]);  // get keys from the first row
+            var headerRow_twoD = Object.keys(Pab_t20[0]);  // get keys from the first row
+            var headerRow_threeD = Object.keys(Pabc_t20[0]);
+
+            var xMaxP = [];
+            xMaxP[0] = d3.max(Pa_t20, function (d) { return +d[headerRow_oneD[0]]; });
+            xMaxP[1] = d3.max(Pb_t20, function (d) { return +d[headerRow_oneD[0]]; });
+            xMaxP[2] = d3.max(Pc_t20, function (d) { return +d[headerRow_oneD[0]]; });
+
+            var xMax_oneD = d3.max(xMaxP);
+            var yMax_oneD = d3.max([Application.utils.findMax(Pa_t20, headerRow_oneD, 1), Application.utils.findMax(Pc_t20, headerRow_oneD, 1), Application.utils.findMax(Pc_t20, headerRow_oneD, 1)]) + 0.01;
+
+            var probMax2D = d3.max([Application.utils.findMax(Pab_t20, headerRow_twoD, 2), Application.utils.findMax(Pac_t20, headerRow_twoD, 2), Application.utils.findMax(Pbc_t20, headerRow_twoD, 2)]) + 0.01;
+            var probMax3D = Application.utils.findMax(Pabc_t20, headerRow_threeD, 3);
+
+            /************************************************************************************/
+            // control buttons to show/hide the views
+//            var button1D = controlPanel.append("g").append("circle")
+//                    .attr("cx", 20)
+//                    .attr("cy", 19)
+//                    .attr("r", 7)
+//                    .attr("fill", "white")
+//                    .attr("stroke", "black")
+//                    .on("click", function () {
+//                        if (Application.show_projectionOneD) {
+//                            Application.show_projectionOneD = false;
+//                        } else {
+//                            Application.show_projectionOneD = true;
+//                            Application.show_projectionTwoD = false;
+//                            Application.show_projectionTwoD_Pab = false;
+//                            Application.show_projectionTwoD_Pac = false;
+//                            Application.show_projectionTwoD_Pbc = false;
+//                            Application.show_projectionThreeD = false;
+//                        }
+//                        console.log("p1 Clicked!");
+//                        console.log(Application.show_projectionOneD);
+//                        showHide();
+//                    });
+//
+//            var button2D = controlPanel.append("g").append("circle")
+//                    .attr("cx", 20)
+//                    .attr("cy", 19+25)
+//                    .attr("r", 7)
+//                    .attr("fill", "white")
+//                    .attr("stroke", "black")
+//                    .on("click", function () {
+//                        if (Application.show_projectionTwoD) {
+//                            Application.show_projectionTwoD = false;
+//                            Application.show_projectionTwoD_Pab = false;
+//                            Application.show_projectionTwoD_Pac = false;
+//                            Application.show_projectionTwoD_Pbc = false;
+//                            Application.show_detailTwoD = false;
+//                        } else {
+//                            Application.show_projectionOneD = false;
+//                            Application.show_projectionTwoD = true;
+//                            Application.show_projectionTwoD_Pab = true;
+//                            Application.show_projectionTwoD_Pac = false;
+//                            Application.show_projectionTwoD_Pbc = false;
+//                            Application.show_detailTwoD = false;
+//                            Application.show_projectionThreeD = false;
+//                        }
+//                        console.log("p2 Clicked!");
+//                        console.log(Application.show_projectionTwoD);
+//                        showHide();
+//                    });
+//
+//            var button2D_ab = controlPanel.append("g").append("circle")
+//                    .attr("cx", 40+7)
+//                    .attr("cy", 19+25*2)
+//                    .attr("r", 7)
+//                    .attr("fill", "white")
+//                    .attr("stroke", "black")
+//                    .on("click", function () {
+//                        if (Application.show_projectionTwoD_Pab) {
+//                            Application.show_projectionTwoD_Pab = false;
+//                        } else {
+//                            Application.show_projectionOneD = false;
+//                            Application.show_projectionTwoD = true;
+//                            Application.show_projectionTwoD_Pab = true;
+//                            Application.show_projectionTwoD_Pac = false;
+//                            Application.show_projectionTwoD_Pbc = false;
+//                            Application.show_detailTwoD = false;
+//                            Application.show_projectionThreeD = false;
+//                        }
+//                        console.log("p2_ab Clicked!");
+//                        console.log(Application.show_projectionTwoD);
+//                        showHide();
+//                    });
+//
+//            var button2D_ac = controlPanel.append("g").append("circle")
+//                    .attr("cx", 40+7)
+//                    .attr("cy", 19+25*3)
+//                    .attr("r", 7)
+//                    .attr("fill", "white")
+//                    .attr("stroke", "black")
+//                    .on("click", function () {
+//                        if (Application.show_projectionTwoD_Pac) {
+//                            Application.show_projectionTwoD_Pac = false;
+//                        } else {
+//                            Application.show_projectionOneD = false;
+//                            Application.show_projectionTwoD = true;
+//                            Application.show_projectionTwoD_Pab = false;
+//                            Application.show_projectionTwoD_Pac = true;
+//                            Application.show_projectionTwoD_Pbc = false;
+//                            Application.show_detailTwoD = false;
+//                            Application.show_projectionThreeD = false;
+//                        }
+//                        console.log("p2_ac Clicked!");
+//                        console.log(Application.show_projectionTwoD);
+//                        showHide();
+//                    });
+//
+//            var button2D_bc = controlPanel.append("g").append("circle")
+//                    .attr("cx", 40+7)
+//                    .attr("cy", 19+25*4)
+//                    .attr("r", 7)
+//                    .attr("fill", "white")
+//                    .attr("stroke", "black")
+//                    .on("click", function () {
+//                        if (Application.show_projectionTwoD_Pbc) {
+//                            Application.show_projectionTwoD_Pbc = false;
+//                        } else {
+//                            Application.show_projectionOneD = false;
+//                            Application.show_projectionTwoD = true;
+//                            Application.show_projectionTwoD_Pab = false;
+//                            Application.show_projectionTwoD_Pac = false;
+//                            Application.show_projectionTwoD_Pbc = true;
+//                            Application.show_detailTwoD = false;
+//                            Application.show_projectionThreeD = false;
+//                        }
+//                        console.log("p2_bc Clicked!");
+//                        console.log(Application.show_projectionTwoD);
+//                        showHide();
+//                    });
+//
+//            var button2D_time = controlPanel.append("g").append("circle")
+//                    .attr("cx", 40+7)
+//                    .attr("cy", 19+25*5)
+//                    .attr("r", 7)
+//                    .attr("fill", "white")
+//                    .attr("stroke", "black")
+//                    .on("click", function () {
+//                        if (Application.show_projectionTwoD_time) {
+//                            Application.show_projectionTwoD_time = false;
+//                        } else {
+//                            Application.show_projectionTwoD_time = true;
+//                            Application.show_projectionTwoD_3rdP = false;
+//                            Application.show_detailTwoD = false;
+//                            Application.show_projectionTwoD = true;
+//                        }
+//                        console.log("p2_time Clicked!");
+//                        console.log(Application.show_projectionTwoD_time);
+//                        showHide();
+//                    });
+//
+//            var button2D_3rdP = controlPanel.append("g").append("circle")
+//                    .attr("cx", 40+7)
+//                    .attr("cy", 19+25*6)
+//                    .attr("r", 7)
+//                    .attr("fill", "white")
+//                    .attr("stroke", "black")
+//                    .on("click", function () {
+//                        if (Application.show_projectionTwoD_3rdP) {
+//                            Application.show_projectionTwoD_3rdP = false;
+//                        } else {
+//                            Application.show_projectionTwoD_time = false;
+//                            Application.show_projectionTwoD_3rdP = true;
+//                            Application.show_projectionTwoD = true;
+//                        }
+//                        console.log("p2_3rdP Clicked!");
+//                        console.log(Application.show_projectionTwoD_3rdP);
+//                        showHide();
+//                    });
+//
+//            var button3D = controlPanel.append("g").append("circle")
+//                    .attr("cx", 20)
+//                    .attr("cy", 19+25*7)
+//                    .attr("r", 7)
+//                    .attr("fill", "white")
+//                    .attr("stroke", "black")
+//                    .on("click", function () {
+//                        if (Application.show_projectionThreeD) {
+//                            Application.show_projectionThreeD = false;
+//                        } else {
+//                            Application.show_projectionOneD = false;
+//                            Application.show_projectionTwoD = false;
+//                            Application.show_projectionTwoD_Pab = false;
+//                            Application.show_projectionTwoD_Pac = false;
+//                            Application.show_projectionTwoD_Pbc = false;
+//                            Application.show_detailTwoD = false;
+//                            Application.show_projectionThreeD = true;
+//                        }
+//                        console.log("p3 Clicked!");
+//                        console.log(Application.show_projectionThreeD);
+//                        showHide();
+//                    });
+//
+//            var buttonPeak = controlPanel.append("g").append("circle")
+//                    .attr("cx", 20)
+//                    .attr("cy", 19+25*9)
+//                    .attr("r", 7)
+//                    .attr("fill", "white")
+//                    .attr("stroke", "black")
+//                    .on("click", function () {
+//                        if (Application.show_peaks) {
+//                            Application.show_peaks = false;
+//                        } else {
+//                            Application.show_peaks = true;
+//                            Application.clickedPaIndex = -1;
+//                            Application.clickedPbIndex = -1;
+//                            Application.clickedPcIndex = -1;
+//                        }
+//                        console.log("peaks Clicked!");
+//                        console.log(Application.show_peaks);
+//                        showHide();
+//                    });
+
+            /************************************************************************************/
+            // time slider
+            var startingTime = 0;
+
+            var timeX = d3.scale.linear().domain([0, Application.TimeStep-1]).range([0, controlPanel_width - Application.margin*2]).clamp(true);
+
+            var brush = d3.svg.brush().x(timeX).extent([startingTime, startingTime]).on("brush", brushed);
+
+            var timeBar = d3.select('#timeSlider').append("g")
+                    .attr("transform", "translate(" + Application.margin + "," + (25+25*11) + ")")
+                    .attr("class", "x time_axis")
+                    .call(d3.svg.axis()
+                            .scale(timeX)
+                            .orient("bottom")
+                            .tickFormat(function (d) { return d; })
+                            .tickSize(0)
+                            .tickPadding(12));
+            //.select(".domain")
+            //.select(function () { console.log(this); return this.parentNode.appendChild(this.cloneNode(true)); })
+            //.attr("class", "halo");
+
+            var timeSlider = timeBar.append("g")
+                    .attr("class", "slider")
+                    .call(brush);
+            timeSlider.selectAll(".extent,.resize").remove();
+            timeSlider.select(".background").attr("height", 60);
+
+            var handle = timeSlider.append("g").attr("class", "handle");
+            handle.append("circle")
+                    .attr("r", 7)
+                    .attr("fill", "white");
+            handle.append("text")
+                    .attr("transform", "translate(0," + (-10) + ")")
+                    .style("text-align", "center")
+                    .attr("font-size", "10pt")
+                    .attr("fill", "black")
+                    .text(startingTime);
+
+            timeSlider.call(brush.event);
+
+            function brushed() {
+                var value = brush.extent()[0];
+                if (d3.event.sourceEvent) {
+                    value = timeX.invert(d3.mouse(this)[0]);
+                    brush.extent([value, value]);
+                }
+                if (value - Math.floor(value) < 0.5) {
+                    value = Math.floor(value);
+                } else {
+                    value = Math.ceil(value);
+                }
+                console.log("time: " + value);
+                handle.attr("transform", "translate(" + timeX(value) + ",0)");
+                handle.select("text").text(value).attr("transform", "translate(0," + (-10) + ")");
+
+                Application.currentTime = value;
+                showHide();
+            }
+
+            /************************************************************************************/
+            function showHide() {
+                if (Application.show_projectionOneD) {
+//                    button1D.attr("fill", "black");
+//                    button2D.attr("fill", "white");
+//                    button2D_ab.attr("fill", "white");
+//                    button2D_ac.attr("fill", "white");
+//                    button2D_bc.attr("fill", "white");
+//                    button3D.attr("fill", "white");
+
+                    Application.oneDV.getProjection().selectAll("*").remove();
+                    Application.twoDV.getProjection().selectAll("*").remove();
+
+                    Application.oneDV.drawAxis(xMax_oneD, yMax_oneD);  // draw X/Y-axis
+
+                    Application.oneDV.renderLineGraphs(Pa_t20, Pb_t20, Pc_t20, headerRow_oneD);
+                    Application.oneDV.renderOneDHeatMaps(Pa_t20, Pb_t20, Pc_t20, Pabc_t20, headerRow_oneD, probMax3D, xMaxP, xMax_oneD, yMax_oneD);
+
+                    if (Application.show_peaks) {
+//                        buttonPeak.attr("fill", "black");
+                        Application.oneDV.getPeaks().selectAll("*").remove();
+                        Application.twoDV.drawPeaks(Pa_t20, Pb_t20, Pc_t20, Pabc_t20, xMaxP, probMax3D);
+                    } else {
+//                        buttonPeak.attr("fill", "white");
+                        Application.oneDV.getPeaks().selectAll("*").remove();
+                    }
+                }
+//                else if (Application.show_projectionTwoD_Pab && Application.show_projectionTwoD) {
+//                    button1D.attr("fill", "white");
+//                    button2D.attr("fill", "black");
+//                    button2D_ab.attr("fill", "black");
+//                    button2D_ac.attr("fill", "white");
+//                    button2D_bc.attr("fill", "white");
+//                    button3D.attr("fill", "white");
+//
+//                    Application.oneDV.getProjection().selectAll("*").remove();
+//                    Application.oneDV.getPeaks().selectAll("*").remove();
+//                    Application.twoDV.getProjection().selectAll("*").remove();
+//                    Application.twoDV.draw2DHeatMap(Pab_t20, probMax2D, Application.currentTime, Pabc_t20);
+//
+//                    if (Application.show_peaks) {
+//                        buttonPeak.attr("fill", "black");
+//                    } else {
+//                        buttonPeak.attr("fill", "white");
+//                    }
+//                    if (Application.show_projectionTwoD_time) {
+//                        button2D_time.attr("fill", "black");
+//                    } else {
+//                        button2D_time.attr("fill", "white");
+//                    }
+//                    if (Application.show_projectionTwoD_3rdP) {
+//                        button2D_3rdP.attr("fill", "black");
+//                    } else {
+//                        button2D_3rdP.attr("fill", "white");
+//                    }
+//                }
+//                else if (Application.show_projectionTwoD_Pac && Application.show_projectionTwoD) {
+//                    button1D.attr("fill", "white");
+//                    button2D.attr("fill", "black");
+//                    button2D_ab.attr("fill", "white");
+//                    button2D_ac.attr("fill", "black");
+//                    button2D_bc.attr("fill", "white");
+//                    button3D.attr("fill", "white");
+//
+//                    Application.oneDV.getProjection().selectAll("*").remove();
+//                    Application.oneDV.getPeaks().selectAll("*").remove();
+//                    Application.twoDV.getProjection().selectAll("*").remove();
+//                    Application.twoDV.draw2DHeatMap(Pac_t20, probMax2D, Application.currentTime, Pabc_t20);
+//
+//                    if (Application.show_peaks) {
+//                        buttonPeak.attr("fill", "black");
+//                    } else {
+//                        buttonPeak.attr("fill", "white");
+//                    }
+//                    if (Application.show_projectionTwoD_time) {
+//                        button2D_time.attr("fill", "black");
+//                    } else {
+//                        button2D_time.attr("fill", "white");
+//                    }
+//                    if (Application.show_projectionTwoD_3rdP) {
+//                        button2D_3rdP.attr("fill", "black");
+//                    } else {
+//                        button2D_3rdP.attr("fill", "white");
+//                    }
+//                }
+//                else if (Application.show_projectionTwoD_Pbc && Application.show_projectionTwoD) {
+//                    button1D.attr("fill", "white");
+//                    button2D.attr("fill", "black");
+//                    button2D_ab.attr("fill", "white");
+//                    button2D_ac.attr("fill", "white");
+//                    button2D_bc.attr("fill", "black");
+//                    button3D.attr("fill", "white");
+//
+//                    Application.oneDV.getProjection().selectAll("*").remove();
+//                    Application.oneDV.getPeaks().selectAll("*").remove();
+//                    Application.twoDV.getProjection().selectAll("*").remove();
+//                    Application.twoDV.draw2DHeatMap(Pbc_t20, probMax2D, Application.currentTime, Pabc_t20);
+//
+//                    if (Application.show_peaks) {
+//                        buttonPeak.attr("fill", "black");
+//                    } else {
+//                        buttonPeak.attr("fill", "white");
+//                    }
+//                    if (Application.show_projectionTwoD_time) {
+//                        button2D_time.attr("fill", "black");
+//                    } else {
+//                        button2D_time.attr("fill", "white");
+//                    }
+//                    if (Application.show_projectionTwoD_3rdP) {
+//                        button2D_3rdP.attr("fill", "black");
+//                    } else {
+//                        button2D_3rdP.attr("fill", "white");
+//                    }
+//                }
+//                else if (Application.show_projectionThreeD) {
+//                    button1D.attr("fill", "white");
+//                    button2D.attr("fill", "white");
+//                    button2D_ab.attr("fill", "white");
+//                    button2D_ac.attr("fill", "white");
+//                    button2D_bc.attr("fill", "white");
+//                    button3D.attr("fill", "black");
+//                    Application.oneDV.getProjection().selectAll("*").remove();
+//                    Application.oneDV.getPeaks().selectAll("*").remove();
+//                    Application.twoDV.getProjection().selectAll("*").remove();
+//                    if (Application.show_peaks) {
+//                        buttonPeak.attr("fill", "black");
+//                    } else {
+//                        buttonPeak.attr("fill", "white");
+//                    }
+//                }
+//                else {
+//                    button1D.attr("fill", "white");
+//                    button2D.attr("fill", "white");
+//                    button2D_ab.attr("fill", "white");
+//                    button2D_ac.attr("fill", "white");
+//                    button2D_bc.attr("fill", "white");
+//                    button3D.attr("fill", "white");
+//                    Application.oneDV.getProjection().selectAll("*").remove();
+//                    Application.oneDV.getPeaks().selectAll("*").remove();
+//                    Application.twoDV.getProjection().selectAll("*").remove();
+//                }
+            }
+
+            showHide();
+
+        }  // end - loadAll()
+
+        /************************************************************************************/
+        /*
+         function type(d) {
+         d.protein_num = +d.protein_num;
+         d.probability = +d.probability;
+         return d;
+         }
+
+         d3.csv("http://localhost:8080/Desktop/BioinformaticsVis/D3/Pa_t0-20.csv", type, function (dataset) {
+         var headerRow = Object.keys(dataset[0]);
+         //console.log(headerRow[1]);
+         xMax = d3.max(dataset, function (d) { return +d[headerRow[0]]; });
+         console.log(xMax);
+         yMax = d3.max(dataset, function (d) { return +d[headerRow[1]]; });
+         console.log(yMax);
+
+         drawLineGraphs(dataset, headerRow[0], headerRow[1]);
+         //drawHeatMaps(dataset);
+         });*/
+
+    }
+    /************************************************************************************/
+</script>
+
+
+</body>
+</html>
