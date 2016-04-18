@@ -15,6 +15,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
     <script src="http://d3js.org/queue.v1.min.js"></script>
 
+</head>
+<body onload="start()">
+<div class="container-fluid">
+
     <!-- Source -->
     <script src="src/js/main.js"></script>
     <script src="src/js/utils.js"></script>
@@ -23,25 +27,27 @@
     <script src="src/js/visualizations/two_dimension.js"></script>
     <script src="src/js/visualizations/third_dimension.js"></script>
 
-</head>
-<body onload="start()">
-<div class="container-fluid">
-
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-sm-2">
             <svg id="timeSlider"></svg>
         </div>
-        <div class="col-lg-4">
+        <div class="col-md-6">
             <svg id="probability"></svg>
         </div>
-        <div class="col-md-4">
+        <div class="col-lg-4">
             <svg id="distribution1D"></svg>
         </div>
     </div>
     <div class="row">
-        <div class="col-sm-4">.col-sm-4</div>
-        <div class="col-sm-4">.col-sm-4</div>
-        <div class="col-sm-4">.col-sm-4</div>
+        <div class="col-md-4">
+            <svg id="heatmapAB"></svg>
+        </div>
+        <div class="col-md-4">
+            <svg id="heatmapAC"></svg>
+        </div>
+        <div class="col-md-4">
+            <svg id="heatmapBC"></svg>
+        </div>
     </div>
 
 </div>
@@ -51,10 +57,17 @@
     /************************************************************************************/
     function start() {
 
-        var svg = d3.select("#probability")
-                .attr("width", Application.outerWidth)
-                .attr("height", Application.outerHeight);
+        var prob_div = d3.select("#probability");
+        var oneD_svg = prob_div
+                .attr("width",  prob_div.node().parentNode.clientWidth )
+                .attr("height", Application.main_height / 2)
+                .append('g');
 
+        var heatmapAB_div = d3.select("#heatmapAB");
+        var twoD_AB_svg = heatmapAB_div
+                .attr("width",  heatmapAB_div.node().parentNode.clientWidth )
+                .attr("height", Application.main_height )
+                .append("g");
         // draw boundary of the entire view
 //        var entire_view = svg.append("rect")
 //                .attr("x", 0)
@@ -64,8 +77,8 @@
 //                .attr("fill", "none")
 //                .attr("stroke", "black");
 
-        var controlPanel_width = (Application.outerWidth - Application.margin*3) / 6;
-        var controlPanel_height = Application.outerHeight - Application.margin*2;
+        var controlPanel_width = (Application.main_width- Application.margin*3) / 6;
+        var controlPanel_height = Application.main_height - Application.margin*2;
 
         var slider = d3.select("#timeSlider")
                 .attr("width", controlPanel_width)
@@ -132,7 +145,7 @@
 
         /************************************************************************************/
 
-        var main = svg.append("g");
+//        var main = svg;
      //           .attr("transform", "translate(" + (controlPanel_width + Application.margin*2) + "," + Application.margin + ")");
 
 //        main.append("rect")
@@ -146,8 +159,8 @@
         /************************************************************************************/
         // 1D projection
 
-        Application.oneDV.initialize(main);
-        Application.twoDV.initialize(main);
+        Application.oneDV.initialize(oneD_svg);
+        Application.twoDV.initialize(twoD_AB_svg);
 
         /************************************************************************************/
         /************************************************************************************/
@@ -463,24 +476,24 @@
 //                    button2D_ac.attr("fill", "white");
 //                    button2D_bc.attr("fill", "white");
 //                    button3D.attr("fill", "white");
-
-                    Application.oneDV.getProjection().selectAll("*").remove();
-                    Application.twoDV.getProjection().selectAll("*").remove();
+//
+//                    Application.oneDV.getProjection().selectAll("*").remove();
+//                    Application.twoDV.getProjection().selectAll("*").remove();
 
                     Application.oneDV.drawAxis(xMax_oneD, yMax_oneD);  // draw X/Y-axis
 
                     Application.oneDV.renderLineGraphs(Pa_t20, Pb_t20, Pc_t20, headerRow_oneD);
                     Application.oneDV.renderOneDHeatMaps(Pa_t20, Pb_t20, Pc_t20, Pabc_t20, headerRow_oneD, probMax3D, xMaxP, xMax_oneD, yMax_oneD);
 
-                    if (Application.show_peaks) {
+//                    if (Application.show_peaks) {
 //                        buttonPeak.attr("fill", "black");
-                        Application.oneDV.getPeaks().selectAll("*").remove();
-                        Application.twoDV.drawPeaks(Pa_t20, Pb_t20, Pc_t20, Pabc_t20, xMaxP, probMax3D);
-                    } else {
+//                        Application.oneDV.getPeaks().selectAll("*").remove();
+//                        Application.twoDV.drawPeaks(Pa_t20, Pb_t20, Pc_t20, Pabc_t20, xMaxP, probMax3D);
+//                    } else {
 //                        buttonPeak.attr("fill", "white");
-                        Application.oneDV.getPeaks().selectAll("*").remove();
-                    }
-                }
+//                        Application.oneDV.getPeaks().selectAll("*").remove();
+//                    }
+//                }
 //                else if (Application.show_projectionTwoD_Pab && Application.show_projectionTwoD) {
 //                    button1D.attr("fill", "white");
 //                    button2D.attr("fill", "black");
@@ -488,12 +501,13 @@
 //                    button2D_ac.attr("fill", "white");
 //                    button2D_bc.attr("fill", "white");
 //                    button3D.attr("fill", "white");
-//
+
 //                    Application.oneDV.getProjection().selectAll("*").remove();
 //                    Application.oneDV.getPeaks().selectAll("*").remove();
+
 //                    Application.twoDV.getProjection().selectAll("*").remove();
-//                    Application.twoDV.draw2DHeatMap(Pab_t20, probMax2D, Application.currentTime, Pabc_t20);
-//
+                    Application.twoDV.draw2DHeatMap(Pab_t20, probMax2D, Application.currentTime, Pabc_t20);
+
 //                    if (Application.show_peaks) {
 //                        buttonPeak.attr("fill", "black");
 //                    } else {
@@ -509,7 +523,7 @@
 //                    } else {
 //                        button2D_3rdP.attr("fill", "white");
 //                    }
-//                }
+                }
 //                else if (Application.show_projectionTwoD_Pac && Application.show_projectionTwoD) {
 //                    button1D.attr("fill", "white");
 //                    button2D.attr("fill", "black");

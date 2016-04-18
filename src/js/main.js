@@ -4,8 +4,14 @@ var Application = Application ||  {};
 //
 (function()
 {
-    Application.outerWidth = 1580;
-    Application.outerHeight = 760;
+    var body = document.body,
+        html = document.documentElement;
+
+    Application.outerWidth = document.getElementsByTagName('body')[0].clientWidth;
+
+    Application.outerHeight = Math.max( body.scrollHeight, body.offsetHeight,
+        html.clientHeight, html.scrollHeight, html.offsetHeight );
+
     Application.margin = 20;
 
     Application.protein_type = 3;
@@ -16,14 +22,13 @@ var Application = Application ||  {};
     Application.shiftX = 50;
     Application.shiftY = 25;
 
-
     Application.clickedPaIndex = -1;
     Application.clickedPbIndex = -1;
     Application.clickedPcIndex = -1;
 
     // main view
     Application.main_width = (Application.outerWidth - Application.margin*3) * 5 / 6;
-    Application.main_height =  Application.outerHeight - Application.margin*2;
+    Application.main_height =  (Application.outerHeight - Application.margin) / 2 ;
 
 
     // Control Panel Variables
