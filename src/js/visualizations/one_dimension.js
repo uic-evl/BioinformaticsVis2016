@@ -29,8 +29,8 @@ Application.oneDV = Application.oneDV || {};
 
         initialize : function(main) {
 
-            lineGraphWidth = main.node().parentNode.clientWidth - Application.margin;
-            lineGraphHeight = Application.main_height / 2;
+            lineGraphWidth = main.node().parentNode.clientWidth - 5 * Application.margin;
+            lineGraphHeight = Application.main_height / 1.5;
 
             xScale = d3.scale.linear().range([0, lineGraphWidth]);
             yScale = d3.scale.linear().range([lineGraphHeight, 0]);
@@ -39,12 +39,15 @@ Application.oneDV = Application.oneDV || {};
                 .attr("transform", "translate(" + Application.shiftX + "," + Application.shiftY + ")");
 
             heatMap = d3.select("#distribution1D")
-                .attr("width", lineGraphWidth - Application.margin)
+                .attr("width", lineGraphWidth)
                 .attr("height", lineGraphHeight);
 
             // locations of states
             projectionOneD_peaks = main.append("g")
-                .attr("transform", "translate(" + (lineGraphWidth + Application.shiftX*2) + "," + Application.shiftY + ")");
+                .attr("width", lineGraphWidth - Application.margin)
+                .attr("height", lineGraphHeight / 2)
+                .attr("transform", "translate(" + (lineGraphWidth + Application.shiftX*2)
+                    + "," + Application.shiftY + ")");
         },
 
         // Accessor to obtain the 1D projection
@@ -56,6 +59,8 @@ Application.oneDV = Application.oneDV || {};
         // draw x/y-axis
         drawAxis: function(xMax, yMax) {
 
+            var chartHeight = lineGraphHeight;
+
             xScale.domain([0, xMax]);
             yScale.domain([0, yMax]);
 
@@ -63,8 +68,9 @@ Application.oneDV = Application.oneDV || {};
             var yAxis = d3.svg.axis().scale(yScale).orient("left");
 
             var xAxisG = projectionOneD.append("g")
-                .attr("transform", "translate(0," + lineGraphHeight + ")")
+                .attr("transform", "translate(0," + chartHeight + ")")
                 .attr("class", "x axis");
+
             var yAxisG = projectionOneD.append("g")
                 .attr("class", "y axis");
 
@@ -90,6 +96,7 @@ Application.oneDV = Application.oneDV || {};
                 .attr("x2", lineGraphWidth - Application.shiftX*1.5)
                 .attr("y2", Application.shiftY)
                 .attr("stroke", d3.hsl(5, 0.9, 0.55));
+
             legend.append("text")
                 .style("text-anchor", "left")
                 .attr("transform", "translate(" + (lineGraphWidth - Application.shiftX*1.5 +5) + "," + Application.shiftY + ")")
@@ -103,6 +110,7 @@ Application.oneDV = Application.oneDV || {};
                 .attr("x2", lineGraphWidth - Application.shiftX*1.5)
                 .attr("y2", Application.shiftY*2)
                 .attr("stroke", d3.hsl(105, 0.9, 0.55));
+
             legend.append("text")
                 .style("text-anchor", "left")
                 .attr("transform", "translate(" + (lineGraphWidth - Application.shiftX*1.5 +5) + "," + Application.shiftY*2 + ")")
@@ -116,6 +124,7 @@ Application.oneDV = Application.oneDV || {};
                 .attr("x2", lineGraphWidth - Application.shiftX*1.5)
                 .attr("y2", Application.shiftY*3)
                 .attr("stroke", d3.hsl(225, 0.9, 0.55));
+
             legend.append("text")
                 .style("text-anchor", "left")
                 .attr("transform", "translate(" + (lineGraphWidth - Application.shiftX*1.5 +5) + "," + Application.shiftY*3 + ")")
