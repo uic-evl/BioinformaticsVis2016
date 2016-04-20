@@ -20,12 +20,31 @@ Application.twoDV = Application.twoDV || {};
         var clickedState;
 
         var projectionTwoD = null;
+        var headerRow_twoD = null;
+        var xMax = null, yMax = null, pMax = null;
 
+        var width = 0, height = 0;
         return {
 
-            initialize: function (main) {
+            initialize: function (main, data) {
                 projectionTwoD = main.append("g")
                     .attr("transform", "translate(" + Application.shiftX + "," + Application.shiftY * 2 + ")");
+
+                headerRow_twoD = Object.keys(Application.data[data][0]);  // get keys from the first row
+
+                xMax = d3.max(Application.data[data], function (d) {
+                    return +d[headerRow_twoD[1]];
+                });
+
+                yMax = d3.max(Application.data[data], function (d) {
+                    return +d[headerRow_twoD[0]];
+                });
+
+                // max prob in the current selected file
+                pMax = Application.utils.findMax(Application.data[data], headerRow_twoD, 2);
+
+                width = twoDHeatMapWidth / (xMax + 1);
+                height = twoDHeatMapHeight / (yMax + 1);
             },
 
             getProjection: function () {
@@ -51,7 +70,7 @@ Application.twoDV = Application.twoDV || {};
 
                 var xAxisLabel = xAxisG.append("text")
                     .style("text-anchor", "left")
-                    .attr("transform", "translate(" + (twoDHeatMapWidth + 10) + "," + "0)")
+                    .attr("transform", "translate(" + (twoDHeatMapWidth + 10) + "," + "" + + Application.shiftY*2 + ")")
                     .attr("class", "label")
                     .text(xLabelText);
 
@@ -62,27 +81,9 @@ Application.twoDV = Application.twoDV || {};
                     .text(yLabelText);
             },
 
-            draw2DHeatMap: function (data, pMax0, t, data3Ps) {
+            update2DHeatMap : function (data, pMax0, t) {
 
-                var headerRow_twoD = Object.keys(data[0]);  // get keys from the first row
-                var xMax = d3.max(data, function (d) {
-                    return +d[headerRow_twoD[1]];
-                });
-                var yMax = d3.max(data, function (d) {
-                    return +d[headerRow_twoD[0]];
-                });
-                var pMax = Application.utils.findMax(data, headerRow_twoD, 2);  // max prob in the current selected file
-                //console.log([xMax, yMax, pMax]);
-                var self = this;
-
-                var width = twoDHeatMapWidth / (xMax + 1);
-                var height = twoDHeatMapHeight / (yMax + 1);
-
-                xScale_twoD.domain([0, xMax]);
-                yScale_twoD.domain([0, yMax]);
-
-                var new_group = projectionTwoD.append("g");
-                var cell = new_group.selectAll("rect").data(data);
+                var cell = projectionTwoD.selectAll("rect").data(Application.data[data]);
 
                 cell.enter().append("rect")
                     .attr("width", width)
@@ -105,15 +106,19 @@ Application.twoDV = Application.twoDV || {};
                         self.drawCell(d, pMax, headerRow_twoD[0], headerRow_twoD[1]);
                     });
 
+                cell.exit().remove();
+            },
+
+            showCurves: function(data){
+
                 // display timeline curves
                 if (Application.show_projectionTwoD_time) {
-                    console.log("first column: " + yMax);
-                    console.log("second column: " + xMax);
+
                     for (var i = 0; i <= yMax; i++) {
                         for (var j = 0; j <= xMax; j++) {
                             var dataCell = [];  // prob in each cell over time
                             for (var k = 0; k < Application.TimeStep; k++) {
-                                dataCell.push(d3.values(data[i * (xMax + 1) + j])[k + 2]);
+                                dataCell.push(d3.values(Application.data[data][i * (xMax + 1) + j])[k + 2]);
                             }
 
                             var x = d3.scale.linear().domain([0, Application.TimeStep - 1]).range([width * j, width * (j + 1)]);
@@ -131,11 +136,50 @@ Application.twoDV = Application.twoDV || {};
                         }
                     }
                 } // end - if
+                // if unchecking, remove the paths
+                else
+                {
+                    projectionTwoD.selectAll("path").remove();
+                }
+            },
+
+            draw2DHeatMap: function (data, pMax0, t) {
+
+                var self = this;
+
+                xScale_twoD.domain([0, xMax]);
+                yScale_twoD.domain([0, yMax]);
+
+                var new_group = projectionTwoD.append("g");
+                var cell = new_group.selectAll("rect").data(Application.data[data]);
+
+                cell.enter().append("rect")
+                    .attr("width", width)
+                    .attr("height", height)
+                    .attr("class", "HeatMap");
+
+                cell.attr("x", function (d) {
+                        return width * d[headerRow_twoD[1]];
+                    })
+                    .attr("y", function (d) {
+                        return height * (yMax - d[headerRow_twoD[0]]);
+                    })
+                    .attr("fill", function (d) {
+                        return d3.hsl(20, 0.5 + 0.45 * d[headerRow_twoD[t + 2]] / pMax, 0.5 + 0.45 * (pMax - d[headerRow_twoD[t + 2]]) / pMax);
+                    })
+                    .on("click", function (d) {
+                        Application.show_detailTwoD = true;
+                        clickedState = d;
+                        console.log("pass d to state: " + clickedState);
+                        self.drawCell(d, pMax, headerRow_twoD[0], headerRow_twoD[1]);
+                    });
+
+
 
                 // display the 3rd protein curves
                 if (Application.show_projectionTwoD_3rdP) {
                     //draw3rdProteinCurve(data, pMax, t);
-                    var headerRow_threeD = Object.keys(data3Ps[0]);  // get keys from the first row
+                    var headerRow_threeD = Object.keys(Application.data["Pabc"][0]);  // get keys from the first row
                     var index_3rdP;
                     for (var i = 0; i < 3; i++) {
                         if (headerRow_threeD[i] != headerRow_twoD[0] && headerRow_threeD[i] != headerRow_twoD[1]) {
@@ -144,11 +188,11 @@ Application.twoDV = Application.twoDV || {};
                         }
                     }
                     console.log("3rd: " + index_3rdP + " - " + headerRow_threeD[index_3rdP]);
-                    var cMax = d3.max(data3Ps, function (d) {
+                    var cMax = d3.max(Application.data["Pabc"], function (d) {
                         return +d[headerRow_threeD[index_3rdP]];
                     });
                     console.log("3rd max: " + cMax);
-                    console.log("3rd length: " + data3Ps.length);
+                    console.log("3rd length: " + Application.data["Pabc"].length);
 
                 } // end - if
 
@@ -169,12 +213,14 @@ Application.twoDV = Application.twoDV || {};
                         .attr("height", 3)
                         .attr("fill", d3.hsl(20, 0.5 + 0.45 * (50 - i) / 50, 0.5 + 0.45 * (1 - (50 - i) / 50)));
                 }
+
                 legend.append("text")
                     .style("text-anchor", "middle")
                     .attr("transform", "translate(" + (twoDHeatMapWidth + Application.shiftX * 2 / 3 +
                         Application.margin * 1.5 / 2) + "," + (Application.shiftY + 3 * 50 + 15) + ")")
                     .attr("font-size", "12pt")
                     .text("0");
+
                 legend.append("text")
                     .style("text-anchor", "middle")
                     .attr("transform", "translate(" + (twoDHeatMapWidth + Application.shiftX * 2 / 3 +
@@ -202,11 +248,13 @@ Application.twoDV = Application.twoDV || {};
                             return d3.hsl(20, 0.5 + 0.45 * d3.values(state)[i + 2] / pMax, 0.5 + 0.45 * (pMax - d3.values(state)[i + 2]) / pMax);
                         });
                 }
+
                 detailCell.append("text")
                     .style("text-anchor", "middle")
                     .attr("transform", "translate(" + (twoDHeatMapWidth - shiftX * 4) + "," + (y0 + shiftY) + ")")
                     .attr("font-size", "12pt")
                     .text(p0 + ": " + d3.values(state)[0]);
+
                 detailCell.append("text")
                     .style("text-anchor", "middle")
                     .attr("transform", "translate(" + (twoDHeatMapWidth - shiftX * 4) + "," + (y0 + shiftY * 2) + ")")
@@ -257,7 +305,7 @@ Application.twoDV = Application.twoDV || {};
 
             drawCell: function (state, pMax, p0, p1) {
 
-                console.log("show state: " + state);
+                //console.log("show state: " + state);
 
                 var x0 = Application.shiftX * 2;
                 var y0 = Application.shiftY * 4;

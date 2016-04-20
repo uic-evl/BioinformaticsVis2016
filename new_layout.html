@@ -30,25 +30,43 @@
 
 <div class="container-fluid">
 
+    <!--Top Row-->
     <div class="row">
-
+        <!--First Column-->
         <div class="col-md-6">
             <svg id="probability"></svg>
         </div>
+
+        <!--Second Column-->
         <div class="col-md-6">
-
+            <!--First Row - Heatmap-->
             <div class="row">
-
                 <div class="col-md-6">
                     <svg id="distribution1D"></svg>
                 </div>
             </div>
 
+            <!--Second Row - Controls-->
             <div class="row">
-                <div class="col-md-6">
-                    <div id="timeSlider"></div>
+                <!--First Column-->
+                <div class="col-md-12">
+                    <!--Time slider Row-->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div id="timeSlider"></div>
+                        </div>
+                    </div>
+                    <br/><br/>
+                    <!--Button Column-->
+                    <div id="buttons" class="row" style="visibility: hidden">
+                        <div class="col-md-6">
+                            <input type="checkbox" name="timeCurves" > Show Time Curves <br/>
+                            <input type="checkbox" name="peaks" > Show Peaks
+                        </div>
+                    </div>
+
                 </div>
-             </div>
+            </div>
 
         </div>
     </div>
@@ -101,36 +119,6 @@
         var controlPanel_width = (Application.main_width- Application.margin*3) / 6;
         var controlPanel_height = Application.main_height - Application.margin*2;
 
-//        var slider = d3.select("#timeSlider")
-//                .attr("width", prob_div.node().parentNode.clientWidth / 2)
-//                .attr("height",controlPanel_height / 2)
-//                .append('g');
-
-//
-//        var button2_time_text = controlPanel.append("text")
-//                .style("text-anchor", "left")
-//                .attr("transform", "translate(" + (40+27) + "," + (25+25*5) + ")")
-//                .attr("font-size", "14pt")
-//                .text("Show Time Curves");
-//        var button2_3rdP_text = controlPanel.append("text")
-//                .style("text-anchor", "left")
-//                .attr("transform", "translate(" + (40+27) + "," + (25+25*6) + ")")
-//                .attr("font-size", "14pt")
-//                .text("Show the 3rd Protein");
-//
-//        var button3_text = controlPanel.append("text")
-//                .style("text-anchor", "left")
-//                .attr("transform", "translate(" + 40 + "," + (25+25*7) + ")")
-//                .attr("font-size", "14pt")
-//                .text("3D Projecion");
-//
-//        var buttonPeak_text = controlPanel.append("text")
-//                .style("text-anchor", "left")
-//                .attr("transform", "translate(" + 40 + "," + (25+25*9) + ")")
-//                .attr("font-size", "14pt")
-//                .text("Show Peaks");
-
-
         /************************************************************************************/
         // 1D projection
 
@@ -138,13 +126,8 @@
 
         // 2D projection
         var pA = Application.twoDV();
-        pA.initialize(twoD_AB_svg);
-
         var pB = Application.twoDV();
-        pB.initialize(twoD_AC_svg);
-
         var pC = Application.twoDV();
-        pC.initialize(twoD_BC_svg);
 
         /************************************************************************************/
         /************************************************************************************/
@@ -174,6 +157,20 @@
                 console.log(error);
             }
 
+            /* save the data in the global context to avoid passing it around */
+            Application.data["Pa"] = Pa_t20;
+            Application.data["Pb"] = Pb_t20;
+            Application.data["Pc"] = Pc_t20;
+
+            Application.data["Pab"] = Pab_t20;
+            Application.data["Pac"] = Pac_t20;
+            Application.data["Pbc"] = Pbc_t20;
+            Application.data["Pabc"] = Pabc_t20;
+
+            pA.initialize(twoD_AB_svg, 'Pab');
+            pB.initialize(twoD_AC_svg, 'Pac');
+            pC.initialize(twoD_BC_svg, 'Pbc');
+
             var headerRow_states = Object.keys(States[0]);
             var headerRow_oneD = Object.keys(Pa_t20[0]);  // get keys from the first row
             var headerRow_twoD = Object.keys(Pab_t20[0]);  // get keys from the first row
@@ -195,82 +192,23 @@
 
             var probMax3D = Application.utils.findMax(Pabc_t20, headerRow_threeD, 3);
 
-
-//
-//            var button2D_3rdP = controlPanel.append("g").append("circle")
-//                    .attr("cx", 40+7)
-//                    .attr("cy", 19+25*6)
-//                    .attr("r", 7)
-//                    .attr("fill", "white")
-//                    .attr("stroke", "black")
-//                    .on("click", function () {
-//                        if (Application.show_projectionTwoD_3rdP) {
-//                            Application.show_projectionTwoD_3rdP = false;
-//                        } else {
-//                            Application.show_projectionTwoD_time = false;
-//                            Application.show_projectionTwoD_3rdP = true;
-//                            Application.show_projectionTwoD = true;
-//                        }
-//                        console.log("p2_3rdP Clicked!");
-//                        console.log(Application.show_projectionTwoD_3rdP);
-//                        showHide();
-//                    });
-//
-//            var button3D = controlPanel.append("g").append("circle")
-//                    .attr("cx", 20)
-//                    .attr("cy", 19+25*7)
-//                    .attr("r", 7)
-//                    .attr("fill", "white")
-//                    .attr("stroke", "black")
-//                    .on("click", function () {
-//                        if (Application.show_projectionThreeD) {
-//                            Application.show_projectionThreeD = false;
-//                        } else {
-//                            Application.show_projectionOneD = false;
-//                            Application.show_projectionTwoD = false;
-//                            Application.show_projectionTwoD_Pab = false;
-//                            Application.show_projectionTwoD_Pac = false;
-//                            Application.show_projectionTwoD_Pbc = false;
-//                            Application.show_detailTwoD = false;
-//                            Application.show_projectionThreeD = true;
-//                        }
-//                        console.log("p3 Clicked!");
-//                        console.log(Application.show_projectionThreeD);
-//                        showHide();
-//                    });
-//
-//            var buttonPeak = controlPanel.append("g").append("circle")
-//                    .attr("cx", 20)
-//                    .attr("cy", 19+25*9)
-//                    .attr("r", 7)
-//                    .attr("fill", "white")
-//                    .attr("stroke", "black")
-//                    .on("click", function () {
-//                        if (Application.show_peaks) {
-//                            Application.show_peaks = false;
-//                        } else {
-//                            Application.show_peaks = true;
-//                            Application.clickedPaIndex = -1;
-//                            Application.clickedPbIndex = -1;
-//                            Application.clickedPcIndex = -1;
-//                        }
-//                        console.log("peaks Clicked!");
-//                        console.log(Application.show_peaks);
-//                        showHide();
-//                    });
-
             /************************************************************************************/
             // time slider
             var startingTime = 0;
 
-            var timeX = d3.scale.linear().domain([0, Application.TimeStep-1]).range([0, controlPanel_width - Application.margin*2]).clamp(true);
+            var timeX = d3.scale.linear().domain([0, Application.TimeStep-1])
+                    .range([0, controlPanel_width - Application.margin*2]).clamp(true);
 
             function brushed(evt, value) {
 
-                console.log(evt);
                 Application.currentTime = value;
 
-                showHide();
+                Application.oneDV.renderLineGraphs(headerRow_oneD);
+                Application.oneDV.renderOneDHeatMaps(headerRow_oneD, probMax3D, xMaxP, xMax_oneD, yMax_oneD);
+
+                pA.update2DHeatMap("Pab" , probMax2D, Application.currentTime);
+                pB.update2DHeatMap("Pac" , probMax2D, Application.currentTime);
+                pC.update2DHeatMap("Pbc" , probMax2D, Application.currentTime);
             }
 
             d3.select('#timeSlider')
@@ -281,176 +219,39 @@
                             .step(1)
                             .on("slide", brushed));
 
-            /************************************************************************************/
-            function showHide() {
-                if (Application.show_projectionOneD) {
-//                    button1D.attr("fill", "black");
-//                    button2D.attr("fill", "white");
-//                    button2D_ab.attr("fill", "white");
-//                    button2D_ac.attr("fill", "white");
-//                    button2D_bc.attr("fill", "white");
-//                    button3D.attr("fill", "white");
-//
-//                    Application.oneDV.getProjection().selectAll("*").remove();
-//                    Application.twoDV.getProjection().selectAll("*").remove();
+            var buttons = d3.select("#buttons").style({visibility: 'visible'})
+                    .selectAll('input')
+                    .on('change', function(evt){
 
-                    Application.oneDV.drawAxis(xMax_oneD, yMax_oneD);  // draw X/Y-axis
+                        if(this.name == 'timeCurves'){
 
-                    Application.oneDV.renderLineGraphs(Pa_t20, Pb_t20, Pc_t20, headerRow_oneD);
-                    Application.oneDV.renderOneDHeatMaps(Pa_t20, Pb_t20, Pc_t20, Pabc_t20, headerRow_oneD, probMax3D, xMaxP, xMax_oneD, yMax_oneD);
+                            // flip the state
+                            Application.show_projectionTwoD_time = !Application.show_projectionTwoD_time;
+                            // render/remove the curves
+                            pA.showCurves("Pab");
+                            pB.showCurves("Pac");
+                            pC.showCurves("Pbc");
 
-//                    if (Application.show_peaks) {
-//                        buttonPeak.attr("fill", "black");
-//                        Application.oneDV.getPeaks().selectAll("*").remove();
-//                        Application.twoDV.drawPeaks(Pa_t20, Pb_t20, Pc_t20, Pabc_t20, xMaxP, probMax3D);
-//                    } else {
-//                        buttonPeak.attr("fill", "white");
-//                        Application.oneDV.getPeaks().selectAll("*").remove();
-//                    }
-//                }
-//                else if (Application.show_projectionTwoD_Pab && Application.show_projectionTwoD) {
-//                    button1D.attr("fill", "white");
-//                    button2D.attr("fill", "black");
-//                    button2D_ab.attr("fill", "black");
-//                    button2D_ac.attr("fill", "white");
-//                    button2D_bc.attr("fill", "white");
-//                    button3D.attr("fill", "white");
+                        }
+                        else if(this.name == 'showPeaks')
+                        {
 
-//                    Application.oneDV.getProjection().selectAll("*").remove();
-//                    Application.oneDV.getPeaks().selectAll("*").remove();
+                        }
 
-//                    Application.twoDV.getProjection().selectAll("*").remove();
-                      pA.draw2DHeatMap(Pab_t20, probMax2D, Application.currentTime, Pabc_t20);
-                      pB.draw2DHeatMap(Pac_t20, probMax2D, Application.currentTime, Pabc_t20);
-                      pC.draw2DHeatMap(Pbc_t20, probMax2D, Application.currentTime, Pabc_t20);
 
-//                    if (Application.show_peaks) {
-//                        buttonPeak.attr("fill", "black");
-//                    } else {
-//                        buttonPeak.attr("fill", "white");
-//                    }
-//                    if (Application.show_projectionTwoD_time) {
-//                        button2D_time.attr("fill", "black");
-//                    } else {
-//                        button2D_time.attr("fill", "white");
-//                    }
-//                    if (Application.show_projectionTwoD_3rdP) {
-//                        button2D_3rdP.attr("fill", "black");
-//                    } else {
-//                        button2D_3rdP.attr("fill", "white");
-//                    }
-                }
-//                else if (Application.show_projectionTwoD_Pac && Application.show_projectionTwoD) {
-//                    button1D.attr("fill", "white");
-//                    button2D.attr("fill", "black");
-//                    button2D_ab.attr("fill", "white");
-//                    button2D_ac.attr("fill", "black");
-//                    button2D_bc.attr("fill", "white");
-//                    button3D.attr("fill", "white");
-//
-//                    Application.oneDV.getProjection().selectAll("*").remove();
-//                    Application.oneDV.getPeaks().selectAll("*").remove();
-//                    Application.twoDV.getProjection().selectAll("*").remove();
-//                    Application.twoDV.draw2DHeatMap(Pac_t20, probMax2D, Application.currentTime, Pabc_t20);
-//
-//                    if (Application.show_peaks) {
-//                        buttonPeak.attr("fill", "black");
-//                    } else {
-//                        buttonPeak.attr("fill", "white");
-//                    }
-//                    if (Application.show_projectionTwoD_time) {
-//                        button2D_time.attr("fill", "black");
-//                    } else {
-//                        button2D_time.attr("fill", "white");
-//                    }
-//                    if (Application.show_projectionTwoD_3rdP) {
-//                        button2D_3rdP.attr("fill", "black");
-//                    } else {
-//                        button2D_3rdP.attr("fill", "white");
-//                    }
-//                }
-//                else if (Application.show_projectionTwoD_Pbc && Application.show_projectionTwoD) {
-//                    button1D.attr("fill", "white");
-//                    button2D.attr("fill", "black");
-//                    button2D_ab.attr("fill", "white");
-//                    button2D_ac.attr("fill", "white");
-//                    button2D_bc.attr("fill", "black");
-//                    button3D.attr("fill", "white");
-//
-//                    Application.oneDV.getProjection().selectAll("*").remove();
-//                    Application.oneDV.getPeaks().selectAll("*").remove();
-//                    Application.twoDV.getProjection().selectAll("*").remove();
-//                    Application.twoDV.draw2DHeatMap(Pbc_t20, probMax2D, Application.currentTime, Pabc_t20);
-//
-//                    if (Application.show_peaks) {
-//                        buttonPeak.attr("fill", "black");
-//                    } else {
-//                        buttonPeak.attr("fill", "white");
-//                    }
-//                    if (Application.show_projectionTwoD_time) {
-//                        button2D_time.attr("fill", "black");
-//                    } else {
-//                        button2D_time.attr("fill", "white");
-//                    }
-//                    if (Application.show_projectionTwoD_3rdP) {
-//                        button2D_3rdP.attr("fill", "black");
-//                    } else {
-//                        button2D_3rdP.attr("fill", "white");
-//                    }
-//                }
-//                else if (Application.show_projectionThreeD) {
-//                    button1D.attr("fill", "white");
-//                    button2D.attr("fill", "white");
-//                    button2D_ab.attr("fill", "white");
-//                    button2D_ac.attr("fill", "white");
-//                    button2D_bc.attr("fill", "white");
-//                    button3D.attr("fill", "black");
-//                    Application.oneDV.getProjection().selectAll("*").remove();
-//                    Application.oneDV.getPeaks().selectAll("*").remove();
-//                    Application.twoDV.getProjection().selectAll("*").remove();
-//                    if (Application.show_peaks) {
-//                        buttonPeak.attr("fill", "black");
-//                    } else {
-//                        buttonPeak.attr("fill", "white");
-//                    }
-//                }
-//                else {
-//                    button1D.attr("fill", "white");
-//                    button2D.attr("fill", "white");
-//                    button2D_ab.attr("fill", "white");
-//                    button2D_ac.attr("fill", "white");
-//                    button2D_bc.attr("fill", "white");
-//                    button3D.attr("fill", "white");
-//                    Application.oneDV.getProjection().selectAll("*").remove();
-//                    Application.oneDV.getPeaks().selectAll("*").remove();
-//                    Application.twoDV.getProjection().selectAll("*").remove();
-//                }
-            }
+                    });
 
-            showHide();
+            /************* Initial Render ********************************************/
+            Application.oneDV.drawAxis(xMax_oneD, yMax_oneD);  // draw X/Y-axis
+
+            Application.oneDV.renderLineGraphs(headerRow_oneD);
+            Application.oneDV.renderOneDHeatMaps(headerRow_oneD, probMax3D, xMaxP, xMax_oneD, yMax_oneD);
+
+            pA.draw2DHeatMap("Pab" ,probMax2D, Application.currentTime);
+            pB.draw2DHeatMap("Pac", probMax2D, Application.currentTime);
+            pC.draw2DHeatMap("Pbc", probMax2D, Application.currentTime);
 
         }  // end - loadAll()
-
-        /************************************************************************************/
-        /*
-         function type(d) {
-         d.protein_num = +d.protein_num;
-         d.probability = +d.probability;
-         return d;
-         }
-
-         d3.csv("http://localhost:8080/Desktop/BioinformaticsVis/D3/Pa_t0-20.csv", type, function (dataset) {
-         var headerRow = Object.keys(dataset[0]);
-         //console.log(headerRow[1]);
-         xMax = d3.max(dataset, function (d) { return +d[headerRow[0]]; });
-         console.log(xMax);
-         yMax = d3.max(dataset, function (d) { return +d[headerRow[1]]; });
-         console.log(yMax);
-
-         drawLineGraphs(dataset, headerRow[0], headerRow[1]);
-         //drawHeatMaps(dataset);
-         });*/
-
     }
     /************************************************************************************/
 </script>

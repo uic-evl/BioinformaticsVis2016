@@ -26,6 +26,9 @@ var Application = Application ||  {};
     Application.clickedPbIndex = -1;
     Application.clickedPcIndex = -1;
 
+
+    Application.data = {};
+
     // main view
     Application.main_width = (Application.outerWidth - Application.margin*3) * 5 / 6;
     Application.main_height =  (Application.outerHeight - Application.margin) / 2 ;
