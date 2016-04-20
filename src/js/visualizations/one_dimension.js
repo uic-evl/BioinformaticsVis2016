@@ -40,14 +40,14 @@ Application.oneDV = Application.oneDV || {};
 
             heatMap = d3.select("#distribution1D")
                 .attr("width", lineGraphWidth)
-                .attr("height", lineGraphHeight);
+                .attr("height", lineGraphHeight / 2);
 
             // locations of states
             projectionOneD_peaks = main.append("g")
                 .attr("width", lineGraphWidth - Application.margin)
                 .attr("height", lineGraphHeight / 2)
-                .attr("transform", "translate(" + (lineGraphWidth + Application.shiftX*2)
-                    + "," + Application.shiftY + ")");
+                .attr("transform", "translate(" + (lineGraphWidth + Application.shiftX*2) + ", 0)");
+//                    + "," + Application.shiftY + ")");
         },
 
         // Accessor to obtain the 1D projection
@@ -151,7 +151,6 @@ Application.oneDV = Application.oneDV || {};
             xScale.domain([0, xMax]);
 
             var new_group = heatMap.append("g");
-
 
             // var new_group = projectionOneD.append("g");
             var bars = new_group.selectAll("rect").data(data);
@@ -293,20 +292,22 @@ Application.oneDV = Application.oneDV || {};
         renderOneDHeatMaps: function(Pa_t20, Pb_t20, Pc_t20, Pabc_t20, headerRow_oneD, probMax3D, xMaxP,  xMax_oneD, yMax_oneD) {
 
             var deltaY = (Application.main_height/2 - Application.shiftY*6)/3;
-            this.drawHeatMaps(Pa_t20, xMax_oneD, yMax_oneD, headerRow_oneD[0], headerRow_oneD[Application.currentTime+1], Application.shiftY*4, lineGraphWidth/xMax_oneD, deltaY*2/3,
+            this.drawHeatMaps(Pa_t20, xMax_oneD, yMax_oneD, headerRow_oneD[0], headerRow_oneD[Application.currentTime+1], Application.shiftY*2, lineGraphWidth/(xMax_oneD*1.25), deltaY * 0.8,
                 0, Pabc_t20, probMax3D, xMaxP, Application.shiftX*2, Application.main_width*2/5 - Application.shiftX*5);
-            this.drawHeatMaps(Pb_t20, xMax_oneD, yMax_oneD, headerRow_oneD[0], headerRow_oneD[Application.currentTime+1], Application.shiftY*4 + deltaY, lineGraphWidth/xMax_oneD, deltaY*2/3,
+            this.drawHeatMaps(Pb_t20, xMax_oneD, yMax_oneD, headerRow_oneD[0], headerRow_oneD[Application.currentTime+1], Application.shiftY*2 + deltaY, lineGraphWidth/(xMax_oneD*1.25), deltaY * 0.8,
                 1, Pabc_t20, probMax3D, xMaxP, Application.shiftX*2, Application.main_width*2/5 - Application.shiftX*5);
-            this.drawHeatMaps(Pc_t20, xMax_oneD, yMax_oneD, headerRow_oneD[0], headerRow_oneD[Application.currentTime+1], Application.shiftY*4 + deltaY*2, lineGraphWidth/xMax_oneD, deltaY*2/3,
+            this.drawHeatMaps(Pc_t20, xMax_oneD, yMax_oneD, headerRow_oneD[0], headerRow_oneD[Application.currentTime+1], Application.shiftY*2 + deltaY*2, lineGraphWidth/(xMax_oneD*1.25), deltaY * 0.8,
                 2, Pabc_t20, probMax3D, xMaxP, Application.shiftX*2, Application.main_width*2/5 - Application.shiftX*5);
+
             /*for (var i = 0; i < TimeStep; i++) {
              drawHeatMaps(Pa_t20, headerRow[0], headerRow[i+1], main_height/2 + shiftY*4 + i*deltaY*2/3/TimeStep, lineGraphWidth/xMax, deltaY*2/3/TimeStep);
              drawHeatMaps(Pb_t20, headerRow[0], headerRow[i+1], main_height/2 + shiftY*4 + deltaY + i*deltaY*2/3/TimeStep, lineGraphWidth/xMax, deltaY*2/3/TimeStep);
              drawHeatMaps(Pc_t20, headerRow[0], headerRow[i+1], main_height/2 + shiftY*4 + deltaY*2 + i*deltaY*2/3/TimeStep, lineGraphWidth/xMax, deltaY*2/3/TimeStep);
              }*/
-            this.outerline(Application.shiftY*4, lineGraphWidth*(xMaxP[0]+1)/xMax_oneD, deltaY*2/3, d3.hsl(5, 0.9, 0.55));
-            this.outerline(Application.shiftY*4 + deltaY, lineGraphWidth*(xMaxP[1]+1)/xMax_oneD, deltaY*2/3, d3.hsl(105, 0.9, 0.55));
-            this.outerline(Application.shiftY*4 + deltaY*2, lineGraphWidth*(xMaxP[2]+1)/xMax_oneD, deltaY*2/3, d3.hsl(225, 0.9, 0.55));
+
+            this.outerline(Application.shiftY*2, lineGraphWidth*(xMaxP[0]+1)/(xMax_oneD*1.25), deltaY * 0.8, d3.hsl(5, 0.9, 0.55));
+            this.outerline(Application.shiftY*2 + deltaY , lineGraphWidth*(xMaxP[1]+1)/(xMax_oneD*1.25), deltaY * 0.8 , d3.hsl(105, 0.9, 0.55));
+            this.outerline(Application.shiftY*2 + deltaY * 2 , lineGraphWidth*(xMaxP[2]+1)/(xMax_oneD*1.25), deltaY * 0.8, d3.hsl(225, 0.9, 0.55));
         }
 
     };
