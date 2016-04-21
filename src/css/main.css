@@ -45,3 +45,5 @@ rect {
     stroke-width: 1.25px;
     cursor: crosshair;
 }
+
+.top-buffer { margin-top:40px; }
