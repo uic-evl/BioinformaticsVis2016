@@ -212,7 +212,7 @@
 
             d3.select('#timeSlider')
                     .call(d3.slider()
-                            .axis(d3.svg.axis().ticks(Application.TimeStep-1))
+                            .axis(d3.svg.axis().ticks(Application.TimeStep))
                             .min(startingTime)
                             .max(Application.TimeStep-1)
                             .step(1)
