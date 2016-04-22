@@ -4,13 +4,10 @@ var Application = Application ||  {};
 //
 (function()
 {
-    var body = document.body,
-        html = document.documentElement;
+    Application.body = document.body;
+    Application.html = document.documentElement;
 
     Application.outerWidth = document.getElementsByTagName('body')[0].clientWidth;
-
-    Application.outerHeight = Math.max( body.scrollHeight, body.offsetHeight,
-        html.clientHeight, html.scrollHeight, html.offsetHeight );
 
     Application.margin = 25;
 
@@ -29,9 +26,7 @@ var Application = Application ||  {};
 
     Application.data = {};
 
-    // main view
-    Application.main_width = (Application.outerWidth - Application.margin*3) * 5 / 6;
-    Application.main_height =  (Application.outerHeight - Application.margin) / 2 ;
+
 
 
     // Control Panel Variables
