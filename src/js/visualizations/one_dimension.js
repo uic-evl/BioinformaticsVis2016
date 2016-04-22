@@ -39,7 +39,7 @@ Application.oneDV = Application.oneDV || {};
                 .attr("transform", "translate(" + Application.shiftX + "," + Application.shiftY + ")");
 
             heatMap = d3.select("#distribution1D")
-                .attr("width", lineGraphWidth - Application.shiftX - Application.margin )
+                .attr("width", lineGraphWidth)
                 .attr("height", lineGraphHeight / 2);
 
             // locations of states
