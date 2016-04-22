@@ -111,8 +111,8 @@
     /************************************************************************************/
     function start() {
 
-        Application.outerHeight = Math.max( Application.body.scrollHeight, Application.body.offsetHeight,
-                Application.html.clientHeight, Application.html.scrollHeight, Application.html.offsetHeight );
+        Application.outerHeight = Math.max( Application.body.scrollHeight || 0, Application.body.offsetHeight ||0,
+            Application.html.clientHeight || 0, Application.html.scrollHeight || 0, Application.html.offsetHeight ||0 );
 
         // main view
         Application.main_width = (Application.outerWidth - Application.margin*3) * 5 / 6;
