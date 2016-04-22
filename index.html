@@ -14,6 +14,9 @@
               crossorigin="anonymous"></script>
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/promiz/1.0.6/promiz.min.js"></script>
+
     <script src="http://d3js.org/queue.v1.min.js"></script>
     <script src="lib/js/d3.slider.js"></script>
 
@@ -32,38 +35,57 @@
 
     <!--Top Row-->
     <div class="row">
-        <!--First Column-->
-        <div class="col-md-6">
-            <svg id="probability"></svg>
-        </div>
 
-        <!--Second Column-->
-        <div class="col-md-6">
-            <!--First Row - Heatmap-->
-            <div class="row">
-                <div class="col-md-6">
-                    <svg id="distribution1D"></svg>
-                </div>
-            </div>
-
+        <div class="col-md-3">
             <!--Second Row - Controls-->
             <div class="row top-buffer">
                 <!--First Column-->
                 <div class="col-md-12">
                     <!--Time slider Row-->
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-10">
                             <div id="timeSlider"></div>
                         </div>
                     </div>
                     <!--Button Column-->
+
                     <div id="buttons" class="row top-buffer" style="visibility: hidden">
-                        <div class="col-md-6">
-                            <input type="checkbox" name="timeCurves" > Show Time Curves <br/>
-                            <input type="checkbox" name="peaks" > Show Peaks
+                        <div class="col-md-10">
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <input type="checkbox" name="timeCurves" > Show Time Curves
+                                </div>
+                                <!--<div class="col-md-5">-->
+                                    <!--<input type="checkbox" name="peaks" > Show Peaks-->
+                                <!--</div>-->
+                            </div>
+
                         </div>
                     </div>
 
+                </div>
+
+            </div>
+        </div>
+
+        <!--First Column-->
+        <div class="col-md-5">
+            <svg id="probability"></svg>
+        </div>
+
+        <!--Second Column-->
+        <div class="col-md-4">
+
+            <!--First Row - Heatmap-->
+            <div class="row">
+                <div class="col-md-4">
+                    <svg id="distribution1D"></svg>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3">
+                    <svg id="peaks1D"></svg>
                 </div>
             </div>
 
@@ -116,7 +138,7 @@
                 .append("g");
 
         var controlPanel_width = (Application.main_width- Application.margin*3) / 6;
-        var controlPanel_height = Application.main_height - Application.margin*2;
+        //var controlPanel_height = Application.main_height - Application.margin*2;
 
         /************************************************************************************/
         // 1D projection
@@ -170,7 +192,6 @@
             pB.initialize(twoD_AC_svg, 'Pac');
             pC.initialize(twoD_BC_svg, 'Pbc');
 
-            var headerRow_states = Object.keys(States[0]);
             var headerRow_oneD = Object.keys(Pa_t20[0]);  // get keys from the first row
             var headerRow_twoD = Object.keys(Pab_t20[0]);  // get keys from the first row
             var headerRow_threeD = Object.keys(Pabc_t20[0]);
@@ -194,6 +215,7 @@
             /************************************************************************************/
             // time slider
             var startingTime = 0;
+            Application.currentTime = 0;
 
             var timeX = d3.scale.linear().domain([0, Application.TimeStep-1])
                     .range([0, controlPanel_width - Application.margin*2]).clamp(true);
@@ -201,9 +223,9 @@
             function brushed(evt, value) {
 
                 Application.currentTime = value;
-
                 Application.oneDV.renderLineGraphs(headerRow_oneD);
                 Application.oneDV.renderOneDHeatMaps(headerRow_oneD, probMax3D, xMaxP, xMax_oneD, yMax_oneD);
+                Application.oneDV.drawPeaks(xMaxP, probMax3D);
 
                 pA.update2DHeatMap("Pab" , probMax2D, Application.currentTime);
                 pB.update2DHeatMap("Pac" , probMax2D, Application.currentTime);
@@ -216,7 +238,8 @@
                             .min(startingTime)
                             .max(Application.TimeStep-1)
                             .step(1)
-                            .on("slide", brushed));
+                            .on("slideend", brushed));
+
 
             var buttons = d3.select("#buttons").style({visibility: 'visible'})
                     .selectAll('input')
@@ -226,7 +249,7 @@
 
                             // flip the state
                             Application.show_projectionTwoD_time = !Application.show_projectionTwoD_time;
-                            // render/remove the curves
+
                             pA.showCurves("Pab");
                             pB.showCurves("Pac");
                             pC.showCurves("Pbc");
@@ -245,6 +268,7 @@
 
             Application.oneDV.renderLineGraphs(headerRow_oneD);
             Application.oneDV.renderOneDHeatMaps(headerRow_oneD, probMax3D, xMaxP, xMax_oneD, yMax_oneD);
+            Application.oneDV.drawPeaks(xMaxP, probMax3D);
 
             pA.draw2DHeatMap("Pab" ,probMax2D, Application.currentTime);
             pB.draw2DHeatMap("Pac", probMax2D, Application.currentTime);

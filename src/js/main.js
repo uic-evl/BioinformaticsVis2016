@@ -19,7 +19,7 @@ var Application = Application ||  {};
     Application.TimeStep = 21;
     Application.currentTime = 10;
 
-    Application.shiftX = 50;
+    Application.shiftX = 55;
     Application.shiftY = 25;
 
     Application.clickedPaIndex = -1;

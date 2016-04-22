@@ -20,7 +20,6 @@ Application.oneDV = Application.oneDV || {};
     // group all the objects in the main view
 
     var projectionOneD = null;
-
     var projectionOneD_peaks = null;
 
     var heatMap = null;
@@ -29,6 +28,7 @@ Application.oneDV = Application.oneDV || {};
 
         initialize : function(main) {
 
+            // Width and height of the line chart
             lineGraphWidth = main.node().parentNode.clientWidth - 5 * Application.margin;
             lineGraphHeight = Application.main_height / 1.5;
 
@@ -39,15 +39,17 @@ Application.oneDV = Application.oneDV || {};
                 .attr("transform", "translate(" + Application.shiftX + "," + Application.shiftY + ")");
 
             heatMap = d3.select("#distribution1D")
-                .attr("width", lineGraphWidth)
+                .attr("width", lineGraphWidth - Application.shiftX - Application.margin )
                 .attr("height", lineGraphHeight / 2);
 
             // locations of states
-            projectionOneD_peaks = main.append("g")
-                .attr("width", lineGraphWidth - Application.margin)
-                .attr("height", lineGraphHeight / 2)
-                .attr("transform", "translate(" + (lineGraphWidth + Application.shiftX*2) + ", 0)");
+            projectionOneD_peaks = d3.select('#peaks1D')
+                .attr("width", lineGraphWidth - Application.shiftX - Application.margin * 2)
+                .attr("height", Application.main_height / 1.5);
+                // .attr("transform", "translate(" + (lineGraphWidth + Application.shiftX*2) + ", 0)");
 //                    + "," + Application.shiftY + ")");
+
+
         },
 
         // Accessor to obtain the 1D projection
@@ -231,18 +233,17 @@ Application.oneDV = Application.oneDV || {};
                 .attr("stroke", color);
         },
 
-        drawLocation : function(xPos, yPos, length, actual_location, max_location, color) {
+        drawLocation : function(xPos, yPos, length, height, actual_location, max_location, color) {
 
             var location_max = projectionOneD_peaks.append("g");
             var location = projectionOneD_peaks.append("g");
 
-            var h = length / Application.protein_type;
             for (var j = 0; j < Application.protein_type; j++) {
                 location_max.append("rect")
                     .attr("x", xPos)
-                    .attr("y", yPos+h*j)
+                    .attr("y", yPos+height*j)
                     .attr("width", length)
-                    .attr("height", h)
+                    .attr("height", height)
                     .attr("stroke", "gray")
                     .attr("fill", "none");
             }
@@ -250,15 +251,16 @@ Application.oneDV = Application.oneDV || {};
             for (var j = 0; j < Application.protein_type; j++) {
                 location.append("rect")
                     .attr("x", xPos)
-                    .attr("y", yPos+h*j)
+                    .attr("y", yPos+height*j)
                     .attr("width", length*actual_location[j]/max_location[j])
-                    .attr("height", h)
+                    .attr("height", height)
                     .attr("stroke", "gray")
                     .attr("fill", color);
 
                 location.append("text")
                     .style("text-anchor", "left")
-                    .attr("transform", "translate(" + (xPos + length*actual_location[j]/max_location[j] + 5) + "," + (yPos + h*(j+0.6)) + ")")
+                    .attr("transform", "translate(" + (xPos + length*actual_location[j]/max_location[j] + 5)
+                        + "," + (yPos + height*(j+0.6)) + ")")
                     .attr("font-size", length/10 + "pt")
                     .attr("fill", "black")
                     .text(actual_location[j]);
@@ -274,6 +276,76 @@ Application.oneDV = Application.oneDV || {};
                     .attr("height", d)
                     .attr("stroke", "black")
                     .attr("fill", "gray");
+            }
+
+        },
+
+        /************************************************************************************/
+        // draw peaks
+        drawPeaks: function (xMaxP, probMax3D) {
+
+            console.log(xMaxP);
+
+            // clean up the old peaks
+            projectionOneD_peaks.selectAll('g').remove();
+
+            var peaks_Pa = Application.utils.findPeaks(Application.data["Pa"], xMaxP[0], 1);
+            var peaks_Pb = Application.utils.findPeaks(Application.data["Pb"], xMaxP[1], 1);
+            var peaks_Pc = Application.utils.findPeaks(Application.data["Pc"], xMaxP[2], 1);
+
+            // number of peaks
+            var peaks_num = peaks_Pa.length * peaks_Pb.length * peaks_Pc.length;
+            console.log(peaks_num);
+
+            // length and width of each peak
+            var length = Math.min(
+                Application.main_width * 2 / 5 - Application.shiftX * 5,
+                (Application.main_height - Application.shiftY * (peaks_num + 1)) / peaks_num
+            );
+
+            var height = length / Application.protein_type;
+
+            // the width of the container
+            var maxWidth =  lineGraphWidth - Application.margin;
+
+            var xPos = 0;
+            var yPos = 0;
+
+            for (var i = 0; i < peaks_Pa.length; i++) {
+                for (var j = 0; j < peaks_Pb.length; j++) {
+                    for (var k = 0; k < peaks_Pc.length; k++) {
+
+                        var peaks = [];
+                        peaks.push(peaks_Pa[i]);
+                        peaks.push(peaks_Pb[j]);
+                        peaks.push(peaks_Pc[k]);
+
+                        var fillColor; // = d3.hsl(20, 0.9, 0.55);
+                        for (var r = 0; r < Application.data["Pabc"].length; r++) {
+                            var row = d3.values(Application.data["Pabc"][r]);
+
+                            if (peaks_Pa[i] == row[0] && peaks_Pb[j] == row[1] && peaks_Pc[k] == row[2]) {
+                                fillColor = d3.hsl(20, 0.5 + 0.45 * row[Application.currentTime + 3] / probMax3D,
+                                    0.5 + 0.45 * (probMax3D - row[Application.currentTime + 3]) / probMax3D);
+                                break;
+                            }
+                        }
+
+                        // check to see if the newly added item would
+                        // go beyond the container's width
+                        if((xPos + length + Application.shiftX) >= maxWidth)
+                        {
+                            xPos = 0;
+                            yPos += (Application.shiftY + length);
+                        }
+
+                        Application.oneDV.drawLocation(xPos, yPos, length, height, peaks, xMaxP, fillColor);
+
+                        // increment the xPos
+                        xPos += (length + Application.shiftX);
+
+                    }
+                }
             }
         },
 
