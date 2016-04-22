@@ -44,7 +44,7 @@ Application.oneDV = Application.oneDV || {};
 
             // locations of states
             projectionOneD_peaks = d3.select('#peaks1D')
-                .attr("width", lineGraphWidth - Application.shiftX - Application.margin * 2)
+                .attr("width", lineGraphWidth )
                 .attr("height", Application.main_height / 1.5);
                 // .attr("transform", "translate(" + (lineGraphWidth + Application.shiftX*2) + ", 0)");
 //                    + "," + Application.shiftY + ")");
@@ -341,7 +341,7 @@ Application.oneDV = Application.oneDV || {};
 
                         // check to see if the newly added item would
                         // go beyond the container's width
-                        if((xPos + length + Application.shiftX/(num_cols-1) ) >= maxWidth)
+                        if((xPos + length ) >= maxWidth)
                         {
                             xPos = 0;
                             yPos += (Application.shiftY/(num_cols-1) + length);
@@ -374,7 +374,7 @@ Application.oneDV = Application.oneDV || {};
             var Pc_t20 = Application.data["Pc"];
             var Pabc_t20 = Application.data["Pabc"];
 
-            var deltaY = (Application.main_height/2 - Application.shiftY*6)/3;
+            var deltaY = (lineGraphHeight/2)/3 - Application.shiftY/2;
             this.drawHeatMaps(Pa_t20, xMax_oneD, yMax_oneD, headerRow_oneD[0], headerRow_oneD[Application.currentTime+1], Application.shiftY*1.5, lineGraphWidth/(xMax_oneD*1.25), deltaY * 0.8,
                 0, Pabc_t20, probMax3D, xMaxP, Application.shiftX*2, Application.main_width*2/5 - Application.shiftX*5);
             this.drawHeatMaps(Pb_t20, xMax_oneD, yMax_oneD, headerRow_oneD[0], headerRow_oneD[Application.currentTime+1], Application.shiftY*1.5 + deltaY, lineGraphWidth/(xMax_oneD*1.25), deltaY * 0.8,
