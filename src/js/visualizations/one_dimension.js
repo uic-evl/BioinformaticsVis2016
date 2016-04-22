@@ -29,7 +29,7 @@ Application.oneDV = Application.oneDV || {};
         initialize : function(main) {
 
             // Width and height of the line chart
-            lineGraphWidth = main.node().parentNode.clientWidth - 5 * Application.margin;
+            lineGraphWidth = (main.node().parentNode.clientWidth - 3 * Application.margin) * 5/6;
             lineGraphHeight = Application.main_height / 1.5;
 
             xScale = d3.scale.linear().range([0, lineGraphWidth]);
@@ -48,8 +48,6 @@ Application.oneDV = Application.oneDV || {};
                 .attr("height", Application.main_height / 1.5);
                 // .attr("transform", "translate(" + (lineGraphWidth + Application.shiftX*2) + ", 0)");
 //                    + "," + Application.shiftY + ")");
-
-
         },
 
         // Accessor to obtain the 1D projection

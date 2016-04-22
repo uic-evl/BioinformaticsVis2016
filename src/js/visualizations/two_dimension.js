@@ -29,7 +29,8 @@ Application.twoDV = Application.twoDV || {};
             initialize: function (main, data) {
 
                 twoDHeatMapWidth =  main.node().parentNode.clientWidth - 5 * Application.margin;
-                twoDHeatMapHeight = Application.main_height - Application.shiftY * 3 - Application.margin * 6;
+                twoDHeatMapHeight = Application.main_height - Application.margin * 6  - Application.shiftY;
+                // twoDHeatMapHeight = Application.main_height - Application.shiftY * 3 - Application.margin * 6;
 
                 xScale_twoD = d3.scale.linear().range([0, twoDHeatMapWidth]);
                 yScale_twoD = d3.scale.linear().range([twoDHeatMapHeight, 0]);

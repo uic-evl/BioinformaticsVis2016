@@ -43,6 +43,11 @@
                 <div class="col-md-12">
                     <!--Time slider Row-->
                     <div class="row">
+                        <div class="col-md-4 col-md-offset-3">
+                            <h4 style="visibility: hidden">Time Slider</h4>
+                        </div>
+                    </div>
+                    <div class="row top-buffer2">
                         <div class="col-md-10">
                             <div id="timeSlider"></div>
                         </div>
@@ -76,10 +81,22 @@
         <!--Second Column-->
         <div class="col-md-4">
 
+            <div class="row">
+                <div class="col-md-3 col-md-offset-4">
+                    <h4 style="visibility: hidden">1D Distribution</h4>
+                </div>
+            </div>
+
             <!--First Row - Heatmap-->
             <div class="row">
                 <div class="col-md-4">
                     <svg id="distribution1D"></svg>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3 col-md-offset-4">
+                    <h4 style="visibility: hidden">1D Peaks</h4>
                 </div>
             </div>
 
@@ -121,8 +138,8 @@
         var prob_div = d3.select("#probability");
 
         var oneD_svg = prob_div
-                .attr("width",  prob_div.node().parentNode.clientWidth )
-                .attr("height", Application.main_height)
+                .attr("width",  prob_div.node().parentNode.clientWidth - Application.margin)
+                .attr("height", Application.main_height - Application.margin * 3)
                 .append('g');
 
         var heatmapAB_div = d3.select("#heatmapAB");
@@ -130,18 +147,18 @@
         var heatmapBC_div = d3.select("#heatmapBC");
 
         var twoD_AB_svg = heatmapAB_div
-                .attr("width",  heatmapAC_div.node().parentNode.clientWidth - Application.margin )
-                .attr("height", Application.main_height )
+                .attr("width",  heatmapAC_div.node().parentNode.clientWidth - Application.margin)
+                .attr("height", Application.main_height - Application.margin * 3)
                 .append("g");
 
         var twoD_AC_svg = heatmapAC_div
-                .attr("width",  heatmapAC_div.node().parentNode.clientWidth - Application.margin )
-                .attr("height", Application.main_height )
+                .attr("width",  heatmapAC_div.node().parentNode.clientWidth - Application.margin)
+                .attr("height", Application.main_height - Application.margin * 3)
                 .append("g");
 
         var twoD_BC_svg = heatmapBC_div
-                .attr("width",  heatmapBC_div.node().parentNode.clientWidth - Application.margin )
-                .attr("height", Application.main_height )
+                .attr("width",  heatmapBC_div.node().parentNode.clientWidth - Application.margin)
+                .attr("height", Application.main_height - Application.margin * 3)
                 .append("g");
 
         var controlPanel_width = (Application.main_width- Application.margin*3) / 6;
@@ -246,8 +263,8 @@
                             .max(Application.TimeStep-1)
                             .step(1)
                             .on("slideend", brushed));
-
-
+            // show the labels
+            d3.selectAll('h4').style({visibility: 'visible'});
             var buttons = d3.select("#buttons").style({visibility: 'visible'})
                     .selectAll('input')
                     .on('change', function(evt){
