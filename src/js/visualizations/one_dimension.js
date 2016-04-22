@@ -234,7 +234,7 @@ Application.oneDV = Application.oneDV || {};
         },
 
         drawLocation : function(xPos, yPos, length, height, actual_location, max_location, color) {
-
+            // console.log(xPos);
             var location_max = projectionOneD_peaks.append("g");
             var location = projectionOneD_peaks.append("g");
 
@@ -266,25 +266,23 @@ Application.oneDV = Application.oneDV || {};
                     .text(actual_location[j]);
             }
 
-            var gene =  projectionOneD_peaks.append("g");
-            var d = length / Application.gene_type;
-            for (var i = 0; i < Application.gene_type; i++) {
-                gene.append("rect")
-                    .attr("x", xPos-d)
-                    .attr("y", yPos+d*i)
-                    .attr("width", d)
-                    .attr("height", d)
-                    .attr("stroke", "black")
-                    .attr("fill", "gray");
-            }
+            // var gene =  projectionOneD_peaks.append("g");
+            // var d = length / Application.gene_type;
+            // for (var i = 0; i < Application.gene_type; i++) {
+            //     gene.append("rect")
+            //         .attr("x", xPos-d)
+            //         .attr("y", yPos+d*i)
+            //         .attr("width", d)
+            //         .attr("height", d)
+            //         .attr("stroke", "black")
+            //         .attr("fill", "gray");
+            // }
 
         },
 
         /************************************************************************************/
         // draw peaks
         drawPeaks: function (xMaxP, probMax3D) {
-
-            console.log(xMaxP);
 
             // clean up the old peaks
             projectionOneD_peaks.selectAll('g').remove();
@@ -295,18 +293,28 @@ Application.oneDV = Application.oneDV || {};
 
             // number of peaks
             var peaks_num = peaks_Pa.length * peaks_Pb.length * peaks_Pc.length;
-            console.log(peaks_num);
 
-            // length and width of each peak
-            var length = Math.min(
-                Application.main_width * 2 / 5 - Application.shiftX * 5,
-                (Application.main_height - Application.shiftY * (peaks_num + 1)) / peaks_num
-            );
-
-            var height = length / Application.protein_type;
+            // get the number of items to display on each row
+            var num_cols = Math.ceil(Math.sqrt(peaks_num));
 
             // the width of the container
-            var maxWidth =  lineGraphWidth - Application.margin;
+            var maxWidth =  projectionOneD_peaks.attr('width');
+                maxHeight =   projectionOneD_peaks.attr('height');// - Application.shiftY,
+
+            var length = ((maxWidth / num_cols) - (Application.shiftX/(num_cols))) * (maxHeight/maxWidth) ;
+                //
+                // Math.sqrt(maxWidth * maxHeight )/ Math.sqrt(num_cols+1)
+                // - (num_cols+1) * Application.margin;
+
+            // console.log(length);
+            // length and width of each peak
+            // length and width of each peak
+            // var length = Math.min(
+            //     Application.main_width * 2 / 5 - Application.shiftX * 5,
+            //     (Application.main_height - Application.shiftY * (peaks_num + 1)) / peaks_num
+            // );
+
+            var height = length / Application.protein_type;
 
             var xPos = 0;
             var yPos = 0;
@@ -333,16 +341,16 @@ Application.oneDV = Application.oneDV || {};
 
                         // check to see if the newly added item would
                         // go beyond the container's width
-                        if((xPos + length + Application.shiftX) >= maxWidth)
+                        if((xPos + length + Application.shiftX/(num_cols-1) ) >= maxWidth)
                         {
                             xPos = 0;
-                            yPos += (Application.shiftY + length);
+                            yPos += (Application.shiftY/(num_cols-1) + length);
                         }
 
                         Application.oneDV.drawLocation(xPos, yPos, length, height, peaks, xMaxP, fillColor);
 
                         // increment the xPos
-                        xPos += (length + Application.shiftX);
+                        xPos += (length + Application.shiftX/(num_cols-1));
 
                     }
                 }

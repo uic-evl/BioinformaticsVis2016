@@ -12,7 +12,7 @@ var Application = Application ||  {};
     Application.outerHeight = Math.max( body.scrollHeight, body.offsetHeight,
         html.clientHeight, html.scrollHeight, html.offsetHeight );
 
-    Application.margin = 20;
+    Application.margin = 25;
 
     Application.protein_type = 3;
     Application.gene_type = 5;
@@ -20,7 +20,7 @@ var Application = Application ||  {};
     Application.currentTime = 10;
 
     Application.shiftX = 55;
-    Application.shiftY = 25;
+    Application.shiftY = 35;
 
     Application.clickedPaIndex = -1;
     Application.clickedPbIndex = -1;
