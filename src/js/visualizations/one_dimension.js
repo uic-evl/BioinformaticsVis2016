@@ -45,7 +45,7 @@ Application.oneDV = Application.oneDV || {};
             // locations of states
             projectionOneD_peaks = d3.select('#peaks1D')
                 .attr("width", lineGraphWidth )
-                .attr("height", Application.main_height / 1.5);
+                .attr("height", Application.main_height / 2);
                 // .attr("transform", "translate(" + (lineGraphWidth + Application.shiftX*2) + ", 0)");
 //                    + "," + Application.shiftY + ")");
         },

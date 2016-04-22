@@ -139,7 +139,7 @@ Application.twoDV = Application.twoDV || {};
                         Application.show_detailTwoD = true;
                         clickedState = d;
                         console.log("pass d to state: " + clickedState);
-                        self.drawCell(d, pMax, headerRow_twoD[0], headerRow_twoD[1]);
+                        this.drawCell(d, pMax, headerRow_twoD[0], headerRow_twoD[1], this);
                     });
 
                 cell.exit().remove();
@@ -250,18 +250,24 @@ Application.twoDV = Application.twoDV || {};
 
                 console.log(svgEl);
 
-                var x0 = svgEl.x.baseVal.value //Application.shiftX * 2;
+                var x0 = svgEl.x.baseVal.value; //Application.shiftX * 2;
                 var y0 = svgEl.y.baseVal.value; //Application.shiftY * 4;
 
                 console.log(y0);
 
                 var w = (twoDHeatMapWidth - Application.shiftX * 4) / Application.TimeStep;
                 var h = twoDHeatMapHeight - Application.shiftY * 3;
+
                 var popupWidth = w * Application.TimeStep;
+                var popupHeight = h * Application.TimeStep;
 
                 if(x0 + popupWidth > twoDHeatMapWidth){
                     x0 += (twoDHeatMapWidth - (x0+popupWidth));
                 }
+
+                // if(y0 + popupHeight > twoDHeatMapHeight){
+                //     y0 -= (twoDHeatMapWidth - (y0+popupHeight));
+                // }
 
                 var detailCell = projectionTwoD.append("g").attr("class", "HeatMap");
                 for (var i = 0; i < Application.TimeStep; i++) {
