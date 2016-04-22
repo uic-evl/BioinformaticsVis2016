@@ -17,7 +17,7 @@ var Application = Application ||  {};
     Application.currentTime = 10;
 
     Application.shiftX = 55;
-    Application.shiftY = 35;
+    Application.shiftY = 25;
 
     Application.clickedPaIndex = -1;
     Application.clickedPbIndex = -1;

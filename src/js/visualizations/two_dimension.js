@@ -209,8 +209,8 @@ Application.twoDV = Application.twoDV || {};
                     .on("click", function (d) {
                         Application.show_detailTwoD = true;
                         clickedState = d;
-                        console.log("pass d to state: " + clickedState);
-                        self.drawCell(d, pMax, headerRow_twoD[0], headerRow_twoD[1]);
+                        console.log(this);
+                        self.drawCell(d, pMax, headerRow_twoD[0], headerRow_twoD[1], this);
                     });
 
                 // display the 3rd protein curves
@@ -245,17 +245,25 @@ Application.twoDV = Application.twoDV || {};
                 this.drawLegend(pMax);
             },
 
-            drawCell: function (state, pMax, p0, p1) {
+            drawCell: function (state, pMax, p0, p1, svgEl) {
 
-                console.log("show state: " + state);
+                console.log(svgEl);
 
-                var x0 = shiftX * 2;
-                var y0 = shiftY * 4;
-                var w = (twoDHeatMapWidth - shiftX * 4) / TimeStep;
-                var h = twoDHeatMapHeight - shiftY * 8;
+                var x0 = svgEl.x.baseVal.value //Application.shiftX * 2;
+                var y0 = svgEl.y.baseVal.value; //Application.shiftY * 4;
+
+                console.log(y0);
+
+                var w = (twoDHeatMapWidth - Application.shiftX * 4) / Application.TimeStep;
+                var h = twoDHeatMapHeight - Application.shiftY * 3;
+                var popupWidth = w * Application.TimeStep;
+
+                if(x0 + popupWidth > twoDHeatMapWidth){
+                    x0 += (twoDHeatMapWidth - (x0+popupWidth));
+                }
 
                 var detailCell = projectionTwoD.append("g").attr("class", "HeatMap");
-                for (var i = 0; i < TimeStep; i++) {
+                for (var i = 0; i < Application.TimeStep; i++) {
                     detailCell.append("rect")
                         .attr("x", x0 + w * i)
                         .attr("y", y0)
@@ -269,23 +277,25 @@ Application.twoDV = Application.twoDV || {};
 
                 detailCell.append("text")
                     .style("text-anchor", "middle")
-                    .attr("transform", "translate(" + (twoDHeatMapWidth - shiftX * 4) + "," + (y0 + shiftY) + ")")
+                    .attr("transform", "translate(" + (twoDHeatMapWidth - Application.shiftX * 4)
+                        + "," + (y0 + Application.shiftY) + ")")
                     .attr("font-size", "12pt")
                     .text(p0 + ": " + d3.values(state)[0]);
 
                 detailCell.append("text")
                     .style("text-anchor", "middle")
-                    .attr("transform", "translate(" + (twoDHeatMapWidth - shiftX * 4) + "," + (y0 + shiftY * 2) + ")")
+                    .attr("transform", "translate(" + (twoDHeatMapWidth - Application.shiftX * 4)
+                        + "," + (y0 + Application.shiftY * 2) + ")")
                     .attr("font-size", "12pt")
                     .text(p1 + ": " + d3.values(state)[1]);
 
                 // time line curve
                 var data = [];
-                for (var i = 0; i < TimeStep; i++) {
+                for (var i = 0; i < Application.TimeStep; i++) {
                     data.push(d3.values(state)[i + 2]);
                 }
                 //console.log(data);
-                var x = d3.scale.linear().domain([0, TimeStep]).range([x0, w * TimeStep + x0]);
+                var x = d3.scale.linear().domain([0, Application.TimeStep]).range([x0, w * Application.TimeStep + x0]);
                 var y = d3.scale.linear().domain([0, pMax]).range([h + y0, y0]);
                 var line = d3.svg.line()
                     .x(function (d, i) {
@@ -301,13 +311,13 @@ Application.twoDV = Application.twoDV || {};
                 var boundray = projectionTwoD.append("rect")
                     .attr("x", x0)
                     .attr("y", y0)
-                    .attr("width", w * TimeStep)
+                    .attr("width", w * Application.TimeStep)
                     .attr("height", h)
                     .attr("fill", "none")
                     .attr("stroke", "black");
 
                 var closeButton = projectionTwoD.append("circle")
-                    .attr("cx", w * TimeStep + x0)
+                    .attr("cx", w * Application.TimeStep + x0)
                     .attr("cy", y0)
                     .attr("r", 10)
                     .attr("fill", "white")
