@@ -146,26 +146,36 @@ Application.oneDV = Application.oneDV || {};
 
 
         drawHeatMaps: function(data, xMax, yMax, xColumn, yColumn, yPos, width, height, p, data2,
-                               probMax, maxProtein, xPeakPos, length) {
+                               probMax, maxProtein, xPeakPos, length, label) {
 
             var clickedIndex = -1;
             xScale.domain([0, xMax]);
 
-            var new_group = heatMap.append("g");
+            var new_group = heatMap
+                .append('g');
 
-            // var new_group = projectionOneD.append("g");
+            new_group.append("text")
+                    .style("text-anchor", "left")
+                    .attr("transform", "translate(0," + (yPos + Math.ceil(height/2) + 3) + ")")
+                    .attr("font-size", 10 + "pt")
+                    .attr("font-weight", "bold")
+                    .attr("fill", "black")
+                    .attr("id", "protein-label")
+                    .text(label);
+
+            var textOffset = new_group.select("#protein-label").node().clientWidth;
             var bars = new_group.selectAll("rect").data(data);
 
             bars.enter().append("rect")
                 .attr("y", yPos)
                 .attr("width", width)
                 .attr("height", height)
+                .attr("transform", "translate(" + (textOffset + 10) + ", 0)")
                 .attr("class", "HeatMap");
 
             bars.attr("x", function (d) { return width*d[xColumn]; })
                 .attr("fill", function (d) {
                     return d3.hsl(20, 0.5+0.45*d[yColumn]/yMax, 0.5+0.45*(yMax-d[yColumn])/yMax);
-                    //return d3.hsl(20, 0.9, 0.5);
                 })
                 .on("click", function (d) {
                     switch (p) {
@@ -222,8 +232,12 @@ Application.oneDV = Application.oneDV || {};
         },
 
         outerline: function(yPos, width, height, color) {
+
+            var textOffset = heatMap.select("#protein-label").node().clientWidth;
+
             heatMap.append("rect")
                 .attr("x", 0)
+                .attr("transform", "translate(" + (textOffset + 10) + ", 0)")
                 .attr("y", yPos)
                 .attr("width", width)
                 .attr("height", height)
@@ -362,12 +376,17 @@ Application.oneDV = Application.oneDV || {};
             var Pabc_t20 = Application.data["Pabc"];
 
             var deltaY = (lineGraphHeight/2)/3 - Application.shiftY/2;
-            this.drawHeatMaps(Pa_t20, xMax_oneD, yMax_oneD, headerRow_oneD[0], headerRow_oneD[Application.currentTime+1], Application.shiftY*1.5, lineGraphWidth/(xMax_oneD*1.25), deltaY * 0.8,
-                0, Pabc_t20, probMax3D, xMaxP, Application.shiftX*2, Application.main_width*2/5 - Application.shiftX*5);
-            this.drawHeatMaps(Pb_t20, xMax_oneD, yMax_oneD, headerRow_oneD[0], headerRow_oneD[Application.currentTime+1], Application.shiftY*1.5 + deltaY, lineGraphWidth/(xMax_oneD*1.25), deltaY * 0.8,
-                1, Pabc_t20, probMax3D, xMaxP, Application.shiftX*2, Application.main_width*2/5 - Application.shiftX*5);
-            this.drawHeatMaps(Pc_t20, xMax_oneD, yMax_oneD, headerRow_oneD[0], headerRow_oneD[Application.currentTime+1], Application.shiftY*1.5 + deltaY*2, lineGraphWidth/(xMax_oneD*1.25), deltaY * 0.8,
-                2, Pabc_t20, probMax3D, xMaxP, Application.shiftX*2, Application.main_width*2/5 - Application.shiftX*5);
+            this.drawHeatMaps(Pa_t20, xMax_oneD, yMax_oneD, headerRow_oneD[0], headerRow_oneD[Application.currentTime+1],
+                Application.shiftY*1.5, lineGraphWidth/(xMax_oneD*1.25), deltaY * 0.8,  0, Pabc_t20, probMax3D, xMaxP,
+                Application.shiftX*2, Application.main_width*2/5 - Application.shiftX*5, "A");
+
+            this.drawHeatMaps(Pb_t20, xMax_oneD, yMax_oneD, headerRow_oneD[0], headerRow_oneD[Application.currentTime+1],
+                Application.shiftY*1.5 + deltaY, lineGraphWidth/(xMax_oneD*1.25), deltaY * 0.8, 1, Pabc_t20, probMax3D,
+                xMaxP, Application.shiftX*2, Application.main_width*2/5 - Application.shiftX*5, "B");
+
+            this.drawHeatMaps(Pc_t20, xMax_oneD, yMax_oneD, headerRow_oneD[0], headerRow_oneD[Application.currentTime+1],
+                Application.shiftY*1.5 + deltaY*2, lineGraphWidth/(xMax_oneD*1.25), deltaY * 0.8, 2, Pabc_t20, probMax3D,
+                xMaxP, Application.shiftX*2, Application.main_width*2/5 - Application.shiftX*5, "C");
 
             this.outerline(Application.shiftY*1.5, lineGraphWidth*(xMaxP[0]+1)/(xMax_oneD*1.25), deltaY * 0.8, d3.hsl(5, 0.9, 0.55));
             this.outerline(Application.shiftY*1.5 + deltaY , lineGraphWidth*(xMaxP[1]+1)/(xMax_oneD*1.25), deltaY * 0.8 , d3.hsl(105, 0.9, 0.55));
