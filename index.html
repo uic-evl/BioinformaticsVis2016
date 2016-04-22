@@ -13,6 +13,7 @@
               integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo="
               crossorigin="anonymous"></script>
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.11.2/lodash.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/promiz/1.0.6/promiz.min.js"></script>
@@ -162,7 +163,6 @@
                 .append("g");
 
         var controlPanel_width = (Application.main_width- Application.margin*3) / 6;
-        //var controlPanel_height = Application.main_height - Application.margin*2;
 
         /************************************************************************************/
         // 1D projection
@@ -203,13 +203,42 @@
             }
 
             /* save the data in the global context to avoid passing it around */
-            Application.data["Pa"] = Pa_t20;
-            Application.data["Pb"] = Pb_t20;
-            Application.data["Pc"] = Pc_t20;
+            Application.data["Pa"] = Pa_t20;//_.slice(Pa_t20, 0, Application.TimeStep);
+            Application.data["Pb"] = Pb_t20;//_.slice(Pb_t20, 0, Application.TimeStep+1);
+            Application.data["Pc"] = Pc_t20;//_.slice(Pc_t20, 0, Application.TimeStep+1);
 
-            Application.data["Pab"] = Pab_t20;
-            Application.data["Pac"] = Pac_t20;
-            Application.data["Pbc"] = Pbc_t20;
+            /* Get the minimum number of molecules for each axis */
+            var minX = Math.min(Application.data["Pa"].length, Application.data["Pb"].length);
+            var minY = Math.min(Application.data["Pb"].length, Application.data["Pc"].length);
+
+            /* Map the data into the same size range */
+            Application.data["Pab"] =  _.reduce(Pab_t20,
+                    function(result, value, key){
+                        if( value["ProteinA"] < minX && value["ProteinB"] < minY)
+                        {
+                            result.push(value);
+                        }
+                        return result;
+                    }, []);
+
+            Application.data["Pac"] = _.reduce(Pac_t20,
+                    function(result, value, key){
+                        if( value["ProteinA"] < minX && value["ProteinC"] < minY)
+                        {
+                            result.push(value);
+                        }
+                        return result;
+                    }, []);
+
+            Application.data["Pbc"] = _.reduce(Pbc_t20,
+                    function(result, value, key){
+                        if( value["ProteinB"] < minX && value["ProteinC"] < minY)
+                        {
+                            result.push(value);
+                        }
+                        return result;
+                    }, []);
+
             Application.data["Pabc"] = Pabc_t20;
 
             pA.initialize(twoD_AB_svg, 'Pab');

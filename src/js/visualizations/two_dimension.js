@@ -74,16 +74,15 @@ Application.twoDV = Application.twoDV || {};
                 var yAxisG = projectionTwoD.append("g")
                     .attr("class", "y axis");
 
-                xAxisG.call(xAxis);
-                yAxisG.call(yAxis);
-
-                var xAxisLabel = xAxisG.append("text")
+                xAxisG.call(xAxis)
+                    .append("text")
                     .style("text-anchor", "left")
                     .attr("transform", "translate(" + (twoDHeatMapWidth/2) + "," + "" + 50 + ")")
                     .attr("class", "label")
                     .text(xLabelText);
 
-                var yAxisLabel = yAxisG.append("text")
+                yAxisG.call(yAxis)
+                    .append("text")
                     .style("text-anchor", "middle")
                     .attr("transform", "translate(" + 0 + "," + (-15) + ")")
                     .attr("class", "label")
@@ -189,28 +188,26 @@ Application.twoDV = Application.twoDV || {};
                 xScale_twoD.domain([0, xMax]);
                 yScale_twoD.domain([0, yMax]);
 
-                var new_group = projectionTwoD.append("g");
-                var cell = new_group.selectAll("rect").data(Application.data[data]);
-
-                cell.enter().append("rect")
-                    .attr("width", width)
-                    .attr("height", height)
-                    .attr("class", "HeatMap");
-
-                cell.attr("x", function (d) {
-                        return width * d[headerRow_twoD[1]];
-                    })
-                    .attr("y", function (d) {
-                        return height * (yMax - d[headerRow_twoD[0]]);
-                    })
-                    .attr("fill", function (d) {
-                        return d3.hsl(20, 0.5 + 0.45 * d[headerRow_twoD[t + 2]] / pMax, 0.5 + 0.45
-                            * (pMax - d[headerRow_twoD[t + 2]]) / pMax);
-                    })
+                projectionTwoD.append("g")
+                    .selectAll("rect")
+                        .data(Application.data[data])
+                            .enter().append("rect")
+                            .attr("width", width)
+                            .attr("height", height)
+                            .attr("class", "HeatMap")
+                            .attr("x", function (d) {
+                                return width * d[headerRow_twoD[1]];
+                            })
+                            .attr("y", function (d) {
+                                return height * (yMax - d[headerRow_twoD[0]]);
+                            })
+                            .attr("fill", function (d) {
+                                return d3.hsl(20, 0.5 + 0.45 * d[headerRow_twoD[t + 2]] / pMax, 0.5 + 0.45
+                                    * (pMax - d[headerRow_twoD[t + 2]]) / pMax);
+                            })
                     .on("click", function (d) {
                         Application.show_detailTwoD = true;
                         clickedState = d;
-                        console.log(this);
                         self.drawCell(d, pMax, headerRow_twoD[0], headerRow_twoD[1], this);
                     });
 
@@ -248,12 +245,8 @@ Application.twoDV = Application.twoDV || {};
 
             drawCell: function (state, pMax, p0, p1, svgEl) {
 
-                console.log(svgEl);
-
                 var x0 = svgEl.x.baseVal.value; //Application.shiftX * 2;
                 var y0 = svgEl.y.baseVal.value; //Application.shiftY * 4;
-
-                console.log(y0);
 
                 var w = (twoDHeatMapWidth - Application.shiftX * 4) / Application.TimeStep;
                 var h = twoDHeatMapHeight - Application.shiftY * 3;
@@ -301,7 +294,7 @@ Application.twoDV = Application.twoDV || {};
                 for (var i = 0; i < Application.TimeStep; i++) {
                     data.push(d3.values(state)[i + 2]);
                 }
-                //console.log(data);
+
                 var x = d3.scale.linear().domain([0, Application.TimeStep]).range([x0, w * Application.TimeStep + x0]);
                 var y = d3.scale.linear().domain([0, pMax]).range([h + y0, y0]);
                 var line = d3.svg.line()
@@ -315,7 +308,7 @@ Application.twoDV = Application.twoDV || {};
                 var lineGraph = projectionTwoD.append("path").attr("transform", "translate(" + w / 2 + ",0)");
                 lineGraph.attr("d", line(data)).attr("stroke", "black");
 
-                var boundray = projectionTwoD.append("rect")
+                var boundary = projectionTwoD.append("rect")
                     .attr("x", x0)
                     .attr("y", y0)
                     .attr("width", w * Application.TimeStep)
@@ -333,11 +326,10 @@ Application.twoDV = Application.twoDV || {};
                         Application.show_detailTwoD = false;
                         detailCell.remove();
                         lineGraph.remove();
-                        boundray.remove();
+                        boundary.remove();
                         closeButton.remove();
                     });
             }
-
         }
     };
 

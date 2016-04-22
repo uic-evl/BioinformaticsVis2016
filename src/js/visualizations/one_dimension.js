@@ -12,7 +12,7 @@ Application.oneDV = Application.oneDV || {};
     var lineGraphWidth = -1;// Application.main_width * 3 / 5;
     var lineGraphHeight = -1;//Application.main_height / 2;
 
-    var xAxisLabelText = "Number of Proteins";
+    var xAxisLabelText = "Number of Molecules";
     var yAxisLabelText = "Probability";
     var xScale = null;//d3.scale.linear().range([0, lineGraphWidth]);
     var yScale = null;//d3.scale.linear().range([lineGraphHeight, 0]);
@@ -74,16 +74,16 @@ Application.oneDV = Application.oneDV || {};
             var yAxisG = projectionOneD.append("g")
                 .attr("class", "y axis");
 
-            xAxisG.call(xAxis);
-            yAxisG.call(yAxis);
-
-            var xAxisLabel = xAxisG.append("text")
+            xAxisG
+                .call(xAxis)
+                .append("text")
                 .style("text-anchor", "middle")
                 .attr("transform", "translate(" + (lineGraphWidth/2) + "," + Application.shiftY*2 + ")")
                 .attr("class", "label")
                 .text(xAxisLabelText);
 
-            var yAxisLabel = yAxisG.append("text")
+            yAxisG.call(yAxis)
+                .append("text")
                 .style("text-anchor", "middle")
                 .attr("transform", "translate(" + 0 + "," + (-5) + ")")
                 .attr("class", "label")
@@ -300,17 +300,6 @@ Application.oneDV = Application.oneDV || {};
                 maxHeight =   projectionOneD_peaks.attr('height');// - Application.shiftY,
 
             var length = ((maxWidth / num_cols) - (Application.shiftX/(num_cols))) * (maxHeight/maxWidth) ;
-                //
-                // Math.sqrt(maxWidth * maxHeight )/ Math.sqrt(num_cols+1)
-                // - (num_cols+1) * Application.margin;
-
-            // console.log(length);
-            // length and width of each peak
-            // length and width of each peak
-            // var length = Math.min(
-            //     Application.main_width * 2 / 5 - Application.shiftX * 5,
-            //     (Application.main_height - Application.shiftY * (peaks_num + 1)) / peaks_num
-            // );
 
             var height = length / Application.protein_type;
 
