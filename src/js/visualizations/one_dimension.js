@@ -144,7 +144,6 @@ Application.oneDV = Application.oneDV || {};
             //lineGraph.exit().remove();
         },
 
-
         drawHeatMaps: function(data, xMax, yMax, xColumn, yColumn, yPos, width, height, p, data2,
                                probMax, maxProtein, xPeakPos, length, label) {
 
@@ -250,32 +249,52 @@ Application.oneDV = Application.oneDV || {};
             var location_max = projectionOneD_peaks.append("g");
             var location = projectionOneD_peaks.append("g");
 
+            var names = ['A','B','C'];
+            var textOff = length / 5;
+
             for (var j = 0; j < Application.protein_type; j++) {
-                location_max.append("rect")
-                    .attr("x", xPos)
+
+                location_max.append("text")
+                    .attr('x', xPos)
+                    .attr('y', yPos+height*j + height/2 + 5)
+                    .style("text-anchor", "right")
+                    .attr("font-size", length/10 + "pt")
+                    .attr("fill", "black")
+                    .text(names[j]);
+
+                location_max
+                    .append("rect")
+                    .attr("x", xPos + textOff)
                     .attr("y", yPos+height*j)
                     .attr("width", length)
                     .attr("height", height)
                     .attr("stroke", "gray")
                     .attr("fill", "none");
+
             }
 
             for (var j = 0; j < Application.protein_type; j++) {
                 location.append("rect")
-                    .attr("x", xPos)
+                    .attr("x", xPos + textOff)
                     .attr("y", yPos+height*j)
                     .attr("width", length*actual_location[j]/max_location[j])
                     .attr("height", height)
                     .attr("stroke", "gray")
                     .attr("fill", color);
 
+                var offset = length*actual_location[j]/max_location[j] + 5 + textOff;
+
+                if(offset >= length)
+                {
+                    offset = offset - Application.margin * actual_location[j]/max_location[j];
+                }
                 location.append("text")
                     .style("text-anchor", "left")
-                    .attr("transform", "translate(" + (xPos + length*actual_location[j]/max_location[j] + 5)
-                        + "," + (yPos + height*(j+0.6)) + ")")
+                    .attr("transform", "translate(" + (xPos + offset) + "," + (yPos + height*(j+0.6)) + ")")
                     .attr("font-size", length/10 + "pt")
                     .attr("fill", "black")
                     .text(actual_location[j]);
+
             }
 
             // var gene =  projectionOneD_peaks.append("g");
@@ -313,7 +332,8 @@ Application.oneDV = Application.oneDV || {};
             var maxWidth =  projectionOneD_peaks.attr('width');
                 maxHeight =   projectionOneD_peaks.attr('height');// - Application.shiftY,
 
-            var length = ((maxWidth / num_cols) - (Application.shiftX/(num_cols))) * (maxHeight/maxWidth) ;
+            var length = ((maxWidth / num_cols) - (Application.shiftX/(num_cols))) * (maxHeight/maxWidth)
+                - Application.margin/(num_cols);
 
             var height = length / Application.protein_type;
 
@@ -342,7 +362,7 @@ Application.oneDV = Application.oneDV || {};
 
                         // check to see if the newly added item would
                         // go beyond the container's width
-                        if((xPos + length ) >= maxWidth)
+                        if((xPos + length) >= maxWidth)
                         {
                             xPos = 0;
                             yPos += (Application.shiftY/(num_cols-1) + length);
