@@ -27,8 +27,9 @@ Application.utils = Application.utils || {};
         findPeaks :  function (data, rows, shift) {
             var peaks = [];
             var peak_num = 0;
-            if (+d3.values(data[0])[Application.currentTime+shift] >= +d3.values(data[1])[Application.currentTime+shift]) {
-                peaks.push(0);
+            if (+d3.values(data[0])[Application.currentTime+shift]
+                    >= +d3.values(data[1])[Application.currentTime+shift]) {
+                peaks.push({count:0, value: 0});
                 peak_num++;
             }
             for (var i = 1; i <= rows-1; i++) {
@@ -37,7 +38,7 @@ Application.utils = Application.utils || {};
                 var row_value_right = d3.values(data[i+1]);
                 if (+row_value_middle[Application.currentTime+shift] >= +row_value_left[Application.currentTime+shift]
                     && +row_value_middle[Application.currentTime+shift] >= +row_value_right[Application.currentTime+shift]) {
-                    peaks.push(i);
+                    peaks.push({count:i, value:row_value_middle[Application.currentTime+shift]});
                     peak_num++;
                 }
             }

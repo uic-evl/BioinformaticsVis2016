@@ -295,6 +295,8 @@ Application.oneDV = Application.oneDV || {};
                     .attr("fill", "black")
                     .text(actual_location[j]);
 
+
+
             }
 
             // var gene =  projectionOneD_peaks.append("g");
@@ -345,20 +347,30 @@ Application.oneDV = Application.oneDV || {};
                     for (var k = 0; k < peaks_Pc.length; k++) {
 
                         var peaks = [];
-                        peaks.push(peaks_Pa[i]);
-                        peaks.push(peaks_Pb[j]);
-                        peaks.push(peaks_Pc[k]);
+                        peaks.push(peaks_Pa[i].count);
+                        peaks.push(peaks_Pb[j].count);
+                        peaks.push(peaks_Pc[k].count);
 
+
+                        console.log(peaks_Pc);
                         var fillColor; // = d3.hsl(20, 0.9, 0.55);
-                        for (var r = 0; r < Application.data["Pabc"].length; r++) {
-                            var row = d3.values(Application.data["Pabc"][r]);
+                        if(peaks_Pc[k].value != 0 && peaks_Pc[k].value < 1e-12)
+                        {
+                            fillColor = d3.hsl(0, 0, 0.86)
+                        }
+                        else
+                        {
+                            for (var r = 0; r < Application.data["Pabc"].length; r++) {
+                                var row = d3.values(Application.data["Pabc"][r]);
 
-                            if (peaks_Pa[i] == row[0] && peaks_Pb[j] == row[1] && peaks_Pc[k] == row[2]) {
-                                fillColor = d3.hsl(20, 0.5 + 0.45 * row[Application.currentTime + 3] / probMax3D,
-                                    0.5 + 0.45 * (probMax3D - row[Application.currentTime + 3]) / probMax3D);
-                                break;
+                                if (peaks_Pa[i].count == row[0] && peaks_Pb[j].count == row[1] && peaks_Pc[k].count == row[2]) {
+                                    fillColor = d3.hsl(20, 0.5 + 0.45 * row[Application.currentTime + 3] / probMax3D,
+                                        0.5 + 0.45 * (probMax3D - row[Application.currentTime + 3]) / probMax3D);
+                                    break;
+                                }
                             }
                         }
+
 
                         // check to see if the newly added item would
                         // go beyond the container's width
