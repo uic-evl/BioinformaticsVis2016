@@ -136,12 +136,16 @@ Application.oneDV = Application.oneDV || {};
         // draw line plots
         drawLineGraph : function(data, xColumn, yColumn, color) {
 
-            var line = d3.svg.line().x(function (d) { return xScale(d[xColumn]); })
+            var line = d3.svg.line()
+                .x(function (d) { return xScale(d[xColumn]); })
                 .y(function (d) { return yScale(d[yColumn]); });
 
-            var lineGraph = projectionOneD.append("path");
-            lineGraph.attr("d", line(data)).attr("stroke", color).attr("stroke-width", "2px");
-            //lineGraph.exit().remove();
+            projectionOneD
+                .append("path")
+                .attr("d", line(data))
+                .attr("stroke", color)
+                .attr("stroke-width", "2px")
+                .classed(yColumn, true);
         },
 
         drawHeatMaps: function(data, xMax, yMax, xColumn, yColumn, yPos, width, height, p, data2,
@@ -229,7 +233,6 @@ Application.oneDV = Application.oneDV || {};
                     }
                 });
         },
-
         outerline: function(yPos, width, height, color) {
 
             var textOffset = heatMap.select("#protein-label").node().clientWidth;

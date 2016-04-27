@@ -36,6 +36,7 @@ var Application = Application ||  {};
     Application.show_projectionTwoD_Pac = false;
     Application.show_projectionTwoD_Pbc = false;
     Application.show_projectionTwoD_time = false;
+    Application.show_projectionOneD_time = false;
     Application.show_projectionTwoD_3rdP = false;
     Application.show_projectionThreeD = false;
     Application.show_peaks = false;
