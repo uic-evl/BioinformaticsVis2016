@@ -119,6 +119,7 @@ Application.twoDV = Application.twoDV || {};
             update2DHeatMap : function (data, pMax0, t) {
 
                 var cell = projectionTwoD.selectAll("rect").data(Application.data[data]);
+                var self = this;
 
                 cell.enter().append("rect")
                     .attr("width", width)
