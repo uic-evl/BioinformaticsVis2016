@@ -207,7 +207,7 @@ Application.twoDV = Application.twoDV || {};
                     .on("click", function (d) {
                         Application.show_detailTwoD = true;
                         clickedState = d;
-                        self.drawCell(d, pMax, headerRow_twoD[0], headerRow_twoD[1], this);
+                        self.drawCell(d, pMax, headerRow_twoD[0], headerRow_twoD[1]);
                     });
 
                 // display the 3rd protein curves
@@ -242,7 +242,7 @@ Application.twoDV = Application.twoDV || {};
                 this.drawLegend(pMax);
             },
 
-            drawCell: function (state, pMax, p0, p1, svgEl) {
+            drawCell: function (state, pMax, p0, p1) {
 
                 var w = (twoDHeatMapWidth - Application.shiftX * 4) / Application.TimeStep;
                 var h = twoDHeatMapHeight - Application.shiftY * 3;

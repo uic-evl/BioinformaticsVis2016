@@ -356,6 +356,8 @@ Application.oneDV = Application.oneDV || {};
                     for (var k = 0; k < peaks_Pc.length; k++) {
 
                         var peaks = [];
+                        var values = [];
+
                         peaks.push(peaks_Pa[i].count);
                         peaks.push(peaks_Pb[j].count);
                         peaks.push(peaks_Pc[k].count);
@@ -364,11 +366,13 @@ Application.oneDV = Application.oneDV || {};
                         if(peaks_Pc[k].value != 0 && peaks_Pc[k].value < 1e-12)
                         {
                             fillColor = d3.hsl(0, 0, 0.86)
+
+                            values.push(peaks_Pa[i]);
+                            values.push(peaks_Pb[j]);
+                            values.push(peaks_Pc[k]);
                         }
                         else
                         {
-                            var values = [];
-
                             for (var r = 0; r < Application.data["Pabc"].length; r++) {
                                 var row = d3.values(Application.data["Pabc"][r]);
 
