@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="src/css/main.css">
     <link rel="stylesheet" type="text/css" href="lib/css/d3.slider.css">
+    <link rel="stylesheet" type="text/css" href="lib/css/d3-tip.css">
 
     <!-- Libraries-->
     <script   src="https://code.jquery.com/jquery-2.2.3.min.js"
@@ -20,6 +21,7 @@
 
     <script src="http://d3js.org/queue.v1.min.js"></script>
     <script src="lib/js/d3.slider.js"></script>
+    <script src="lib/js/d3-tip.js"></script>
 
 </head>
 <body onload="start()">
@@ -56,14 +58,14 @@
                     <!--Button Column-->
 
                     <div id="buttons" class="row top-buffer" style="visibility: hidden">
-                        <div class="col-md-10">
+                        <div class="col-md-12">
                             <div class="row">
-                                <div class="col-md-10">
+                                <div class="col-md-6">
                                     <input type="checkbox" name="timeCurves" > Show Time Curves
                                 </div>
-                                <!--<div class="col-md-5">-->
-                                    <!--<input type="checkbox" name="peaks" > Show Peaks-->
-                                <!--</div>-->
+                                <div class="col-md-6">
+                                    <input type="checkbox" name="currentTime" > Show Current Time
+                                </div>
                             </div>
 
                         </div>
@@ -178,15 +180,6 @@
         /************************************************************************************/
         // load multiple files and draw
         queue()
-        /*.defer(d3.csv, "http://localhost:8080/Desktop/BioinformaticsVis/D3/Pa_t0-20.csv")
-         .defer(d3.csv, "http://localhost:8080/Desktop/BioinformaticsVis/D3/Pb_t0-20.csv")
-         .defer(d3.csv, "http://localhost:8080/Desktop/BioinformaticsVis/D3/Pc_t0-20.csv")
-         .defer(d3.csv, "http://localhost:8080/Desktop/BioinformaticsVis/D3/Pab_t0-20.csv")
-         .defer(d3.csv, "http://localhost:8080/Desktop/BioinformaticsVis/D3/Pac_t0-20.csv")
-         .defer(d3.csv, "http://localhost:8080/Desktop/BioinformaticsVis/D3/Pbc_t0-20.csv")
-         .defer(d3.csv, "http://localhost:8080/Desktop/BioinformaticsVis/D3/Pabc_t0-20.csv")
-         .defer(d3.csv, "http://localhost:8080/Desktop/BioinformaticsVis/D3/state_space.csv")
-         */
                 .defer(d3.csv, "Pa_t0-20.csv")
                 .defer(d3.csv, "Pb_t0-20.csv")
                 .defer(d3.csv, "Pc_t0-20.csv")
@@ -308,7 +301,7 @@
                             pC.showCurves("Pbc");
 
                         }
-                        else if(this.name == 'showPeaks')
+                        else if(this.name == 'currentTime')
                         {
 
                         }

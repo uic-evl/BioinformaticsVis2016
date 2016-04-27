@@ -45,7 +45,7 @@ Application.oneDV = Application.oneDV || {};
             // locations of states
             projectionOneD_peaks = d3.select('#peaks1D')
                 .attr("width", lineGraphWidth )
-                .attr("height", Application.main_height / 2);
+                .attr("height", Application.main_height / 1.5);
                 // .attr("transform", "translate(" + (lineGraphWidth + Application.shiftX*2) + ", 0)");
 //                    + "," + Application.shiftY + ")");
         },
@@ -244,60 +244,70 @@ Application.oneDV = Application.oneDV || {};
                 .attr("stroke", color);
         },
 
-        drawLocation : function(xPos, yPos, length, height, actual_location, max_location, color) {
-            // console.log(xPos);
-            var location_max = projectionOneD_peaks.append("g");
-            var location = projectionOneD_peaks.append("g");
+        drawLocation : function(xPos, yPos, length, height, actual_location, max_location, color, values) {
+
+            var location_max =
+                projectionOneD_peaks
+                    .append('g')
+                        .selectAll('.data')
+                        .data(values).enter().append("g");
 
             var names = ['A','B','C'];
             var textOff = length / 5;
 
-            for (var j = 0; j < Application.protein_type; j++) {
-
-                location_max.append("text")
-                    .attr('x', xPos)
-                    .attr('y', yPos+height*j + height/2 + 5)
-                    .style("text-anchor", "right")
-                    .attr("font-size", length/10 + "pt")
-                    .attr("fill", "black")
-                    .text(names[j]);
-
-                location_max
-                    .append("rect")
+            location_max
+                .append("rect")
                     .attr("x", xPos + textOff)
-                    .attr("y", yPos+height*j)
+                    .attr("y", function(d, i)
+                    {
+                        return yPos+height*i;
+                    })
                     .attr("width", length)
                     .attr("height", height)
                     .attr("stroke", "gray")
                     .attr("fill", "none");
 
-            }
+            location_max
+                .append("rect")
+                .attr("x", xPos + textOff)
+                .attr("y", function(d, i) { return yPos+height*i })
+                .attr("width", function(d, i) { return length*actual_location[i]/max_location[i] } )
+                .attr("height", height)
+                .attr("stroke", "gray")
+                .attr("fill", color)
+                .classed('peaks', true);
 
-            for (var j = 0; j < Application.protein_type; j++) {
-                location.append("rect")
-                    .attr("x", xPos + textOff)
-                    .attr("y", yPos+height*j)
-                    .attr("width", length*actual_location[j]/max_location[j])
-                    .attr("height", height)
-                    .attr("stroke", "gray")
-                    .attr("fill", color);
-
-                var offset = length*actual_location[j]/max_location[j] + 5 + textOff;
-
-                if(offset >= length)
+            location_max
+                .append("text")
+                .attr('x', xPos)
+                .attr('y', function(d,i)
                 {
-                    offset = offset - Application.margin * actual_location[j]/max_location[j];
-                }
-                location.append("text")
+                    return yPos+height*i + height/2 + 5
+                })
+                .style("text-anchor", "right")
+                .attr("font-size", length/10 + "pt")
+                .attr("fill", "black")
+                .text(function(d, i){
+                    return names[i];
+                });
+
+            location_max
+                .append("text")
                     .style("text-anchor", "left")
-                    .attr("transform", "translate(" + (xPos + offset) + "," + (yPos + height*(j+0.6)) + ")")
+                    .attr("transform", function(d, i) {
+
+                        var offset = length * actual_location[i]/max_location[i] + 5 + textOff;
+
+                        if(offset >= length)
+                        {
+                            offset = offset - Application.margin * actual_location[i]/max_location[i];
+                        }
+
+                        return "translate(" + (xPos + offset) + "," + (yPos + height*(i+0.6)) + ")";
+                    })
                     .attr("font-size", length/10 + "pt")
                     .attr("fill", "black")
-                    .text(actual_location[j]);
-
-
-
-            }
+                    .text(function(d, i){ return actual_location[i];});
 
             // var gene =  projectionOneD_peaks.append("g");
             // var d = length / Application.gene_type;
@@ -334,8 +344,7 @@ Application.oneDV = Application.oneDV || {};
             var maxWidth =  projectionOneD_peaks.attr('width');
                 maxHeight =   projectionOneD_peaks.attr('height');// - Application.shiftY,
 
-            var length = ((maxWidth / num_cols) - (Application.shiftX/(num_cols))) * (maxHeight/maxWidth)
-                - Application.margin/(num_cols);
+            var length = maxWidth / 7.5;
 
             var height = length / Application.protein_type;
 
@@ -351,8 +360,6 @@ Application.oneDV = Application.oneDV || {};
                         peaks.push(peaks_Pb[j].count);
                         peaks.push(peaks_Pc[k].count);
 
-
-                        console.log(peaks_Pc);
                         var fillColor; // = d3.hsl(20, 0.9, 0.55);
                         if(peaks_Pc[k].value != 0 && peaks_Pc[k].value < 1e-12)
                         {
@@ -360,17 +367,23 @@ Application.oneDV = Application.oneDV || {};
                         }
                         else
                         {
+                            var values = [];
+
                             for (var r = 0; r < Application.data["Pabc"].length; r++) {
                                 var row = d3.values(Application.data["Pabc"][r]);
 
                                 if (peaks_Pa[i].count == row[0] && peaks_Pb[j].count == row[1] && peaks_Pc[k].count == row[2]) {
                                     fillColor = d3.hsl(20, 0.5 + 0.45 * row[Application.currentTime + 3] / probMax3D,
                                         0.5 + 0.45 * (probMax3D - row[Application.currentTime + 3]) / probMax3D);
+
+                                    values.push(peaks_Pa[i]);
+                                    values.push(peaks_Pb[j]);
+                                    values.push(peaks_Pc[k]);
+
                                     break;
                                 }
                             }
                         }
-
 
                         // check to see if the newly added item would
                         // go beyond the container's width
@@ -380,14 +393,26 @@ Application.oneDV = Application.oneDV || {};
                             yPos += (Application.shiftY/(num_cols-1) + length);
                         }
 
-                        Application.oneDV.drawLocation(xPos, yPos, length, height, peaks, xMaxP, fillColor);
+                        Application.oneDV.drawLocation(xPos, yPos, length, height, peaks, xMaxP, fillColor, values);
 
                         // increment the xPos
-                        xPos += (length + Application.shiftX/(num_cols-1));
+                        xPos += (length + Application.shiftX/(num_cols-1) + 10);
 
                     }
                 }
             }
+
+            /* Initialize tooltip */
+            var tip = d3.tip().attr('class', 'd3-tip').html(function(d) {
+                var tooltip = "<span style='color:red'>Count:</span>" + d.count + "<br\><br\><span style='color:red'>Value: </span>" + d.value;
+                return tooltip;
+            });
+            // attach the tooltip listener to the peaks element
+            d3.select('#peaks1D').call(tip);
+
+            d3.selectAll('.peaks')
+                .on('mouseover', tip.show)
+                .on('mouseout', tip.hide);
         },
 
         renderLineGraphs: function(headerRow_oneD) {
