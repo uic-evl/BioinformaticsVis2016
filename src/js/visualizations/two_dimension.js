@@ -137,8 +137,7 @@ Application.twoDV = Application.twoDV || {};
                     .on("click", function (d) {
                         Application.show_detailTwoD = true;
                         clickedState = d;
-                        console.log("pass d to state: " + clickedState);
-                        this.drawCell(d, pMax, headerRow_twoD[0], headerRow_twoD[1], this);
+                        self.drawCell(d, pMax, headerRow_twoD[0], headerRow_twoD[1], this);
                     });
 
                 cell.exit().remove();
@@ -245,11 +244,11 @@ Application.twoDV = Application.twoDV || {};
 
             drawCell: function (state, pMax, p0, p1, svgEl) {
 
-                var x0 = svgEl.x.baseVal.value; //Application.shiftX * 2;
-                var y0 = svgEl.y.baseVal.value; //Application.shiftY * 4;
-
                 var w = (twoDHeatMapWidth - Application.shiftX * 4) / Application.TimeStep;
                 var h = twoDHeatMapHeight - Application.shiftY * 3;
+
+                var x0 = (twoDHeatMapWidth - (w * Application.TimeStep) ) / 2;
+                var y0 = (twoDHeatMapHeight - h)  / 2;
 
                 var popupWidth = w * Application.TimeStep;
                 var popupHeight = h * Application.TimeStep;
