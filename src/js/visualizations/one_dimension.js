@@ -365,7 +365,7 @@ Application.oneDV = Application.oneDV || {};
                         var fillColor; // = d3.hsl(20, 0.9, 0.55);
                         if(peaks_Pc[k].value != 0 && peaks_Pc[k].value < 1e-12)
                         {
-                            fillColor = d3.hsl(0, 0, 0.86)
+                            fillColor = d3.hsl(0, 0, 0.86);
 
                             values.push(peaks_Pa[i]);
                             values.push(peaks_Pb[j]);
