@@ -137,7 +137,7 @@ Application.twoDV = Application.twoDV || {};
                     .on("click", function (d) {
                         Application.show_detailTwoD = true;
                         clickedState = d;
-                        self.drawCell(d, pMax, headerRow_twoD[0], headerRow_twoD[1], this);
+                        self.drawCell(d, pMax, headerRow_twoD[0], headerRow_twoD[1]);
                     });
 
                 cell.exit().remove();
