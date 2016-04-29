@@ -186,7 +186,7 @@ Application.twoDV = Application.twoDV || {};
                 var self = this;
 
                 xScale_twoD.domain([0, xMax]);
-                yScale_twoD.domain([0, yMax]);
+                yScale_twoD.domain([0, yMax]);  
 
                 projectionTwoD.append("g")
                     .selectAll("rect")
@@ -202,6 +202,7 @@ Application.twoDV = Application.twoDV || {};
                                 return height * (yMax - d[headerRow_twoD[0]]);
                             })
                             .attr("fill", function (d) {
+                                console.log(d);
                                 return d3.hsl(20, 0.5 + 0.45 * d[headerRow_twoD[t + 2]] / pMax, 0.5 + 0.45
                                     * (pMax - d[headerRow_twoD[t + 2]]) / pMax);
                             })
@@ -252,15 +253,10 @@ Application.twoDV = Application.twoDV || {};
                 var y0 = (twoDHeatMapHeight - h)  / 2;
 
                 var popupWidth = w * Application.TimeStep;
-                var popupHeight = h * Application.TimeStep;
 
                 if(x0 + popupWidth > twoDHeatMapWidth){
                     x0 += (twoDHeatMapWidth - (x0+popupWidth));
                 }
-
-                // if(y0 + popupHeight > twoDHeatMapHeight){
-                //     y0 -= (twoDHeatMapWidth - (y0+popupHeight));
-                // }
 
                 var detailCell = projectionTwoD.append("g").attr("class", "HeatMap");
                 for (var i = 0; i < Application.TimeStep; i++) {
