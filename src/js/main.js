@@ -23,11 +23,7 @@ var Application = Application ||  {};
     Application.clickedPbIndex = -1;
     Application.clickedPcIndex = -1;
 
-
     Application.data = {};
-
-
-
 
     // Control Panel Variables
     Application.show_projectionOneD = true;
@@ -41,5 +37,6 @@ var Application = Application ||  {};
     Application.show_projectionThreeD = false;
     Application.show_peaks = false;
     Application.show_detailTwoD = false;
+    Application.show_qualitative = false;
 
 })();
