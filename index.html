@@ -20,6 +20,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/promiz/1.0.6/promiz.min.js"></script>
 
     <script src="http://d3js.org/queue.v1.min.js"></script>
+    <script src="http://colorbrewer2.org/export/colorbrewer.js"></script>
     <script src="lib/js/d3.slider.js"></script>
     <script src="lib/js/d3-tip.js"></script>
 
@@ -67,7 +68,14 @@
                                     <input type="checkbox" name="currentTime" > Show Current Time
                                 </div>
                             </div>
-
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <input type="checkbox" name="heatmap" > Change Heat Map
+                                </div>
+                                <!--<div class="col-md-6">-->
+                                    <!--<input type="checkbox" name="currentTime" > Show Current Time-->
+                                <!--</div>-->
+                            </div>
                         </div>
                     </div>
 
@@ -172,22 +180,22 @@
         Application.oneDV.initialize(oneD_svg);
 
         // 2D projection
-        var pA = Application.twoDV();
-        var pB = Application.twoDV();
-        var pC = Application.twoDV();
+        var pAB = Application.twoDV();
+        var pBC = Application.twoDV();
+        var pAC = Application.twoDV();
 
         /************************************************************************************/
         /************************************************************************************/
         // load multiple files and draw
         queue()
-                .defer(d3.csv, "Pa_t0-20.csv")
-                .defer(d3.csv, "Pb_t0-20.csv")
-                .defer(d3.csv, "Pc_t0-20.csv")
-                .defer(d3.csv, "Pab_t0-20.csv")
-                .defer(d3.csv, "Pac_t0-20.csv")
-                .defer(d3.csv, "Pbc_t0-20.csv")
-                .defer(d3.csv, "Pabc_t0-20.csv")
-                .defer(d3.csv, "state_space.csv")
+                .defer(d3.csv, "./data/Pa_t0-20.csv")
+                .defer(d3.csv, "./data/Pb_t0-20.csv")
+                .defer(d3.csv, "./data/Pc_t0-20.csv")
+                .defer(d3.csv, "./data/Pab_t0-20.csv")
+                .defer(d3.csv, "./data/Pac_t0-20.csv")
+                .defer(d3.csv, "./data/Pbc_t0-20.csv")
+                .defer(d3.csv, "./data/Pabc_t0-20.csv")
+                .defer(d3.csv, "./data/state_space.csv")
                 .await(loadAll);
 
         function loadAll(error, Pa_t20, Pb_t20, Pc_t20, Pab_t20, Pac_t20, Pbc_t20, Pabc_t20, States) {
@@ -234,9 +242,9 @@
 
             Application.data["Pabc"] = Pabc_t20;
 
-            pA.initialize(twoD_AB_svg, 'Pab');
-            pB.initialize(twoD_AC_svg, 'Pac');
-            pC.initialize(twoD_BC_svg, 'Pbc');
+            pAB.initialize(twoD_AB_svg, 'Pab');
+            pBC.initialize(twoD_AC_svg, 'Pac');
+            pAC.initialize(twoD_BC_svg, 'Pbc');
 
             var headerRow_oneD = Object.keys(Pa_t20[0]);  // get keys from the first row
             var headerRow_twoD = Object.keys(Pab_t20[0]);  // get keys from the first row
@@ -293,9 +301,9 @@
                 Application.oneDV.renderOneDHeatMaps(headerRow_oneD, probMax3D, xMaxP, xMax_oneD, yMax_oneD);
                 Application.oneDV.drawPeaks(xMaxP, probMax3D);
 
-                pA.update2DHeatMap("Pab" , probMax2D, Application.currentTime);
-                pB.update2DHeatMap("Pac" , probMax2D, Application.currentTime);
-                pC.update2DHeatMap("Pbc" , probMax2D, Application.currentTime);
+                pAB.update2DHeatMap(Application.currentTime, colorbrewer.Set1["4"]);
+                pBC.update2DHeatMap(Application.currentTime, colorbrewer.Set1["4"]);
+                pAC.update2DHeatMap(Application.currentTime, colorbrewer.Set1["4"]);
 
                 if(Application.show_projectionOneD_time)
                 {
@@ -321,14 +329,14 @@
                     .selectAll('input')
                     .on('change', function(evt){
 
-                        if(this.name == 'timeCurves'){
-
+                        if(this.name == 'timeCurves')
+                        {
                             // flip the state
                             Application.show_projectionTwoD_time = !Application.show_projectionTwoD_time;
 
-                            pA.showCurves("Pab");
-                            pB.showCurves("Pac");
-                            pC.showCurves("Pbc");
+                            pAB.showCurves("Pab");
+                            pBC.showCurves("Pac");
+                            pAC.showCurves("Pbc");
 
                         }
                         else if(this.name == 'currentTime')
@@ -336,7 +344,15 @@
                             Application.show_projectionOneD_time = !Application.show_projectionOneD_time;
                             toggleLines(evt);
                         }
+                        else if(this.name == "heatmap")
+                        {
+                            // flip the state of the rendering type
+                            Application.show_qualitative = !Application.show_qualitative;
 
+                            pAB.update2DHeatMap(Application.currentTime, colorbrewer.Set1["4"]);
+                            pBC.update2DHeatMap(Application.currentTime, colorbrewer.Set1["4"]);
+                            pAC.update2DHeatMap(Application.currentTime, colorbrewer.Set1["4"]);
+                        }
 
                     });
 
@@ -347,9 +363,9 @@
             Application.oneDV.renderOneDHeatMaps(headerRow_oneD, probMax3D, xMaxP, xMax_oneD, yMax_oneD);
             Application.oneDV.drawPeaks(xMaxP, probMax3D);
 
-            pA.draw2DHeatMap("Pab" ,probMax2D, Application.currentTime);
-            pB.draw2DHeatMap("Pac", probMax2D, Application.currentTime);
-            pC.draw2DHeatMap("Pbc", probMax2D, Application.currentTime);
+            pAB.draw2DHeatMap("Pab" ,probMax2D, Application.currentTime);
+            pBC.draw2DHeatMap("Pac", probMax2D, Application.currentTime);
+            pAC.draw2DHeatMap("Pbc", probMax2D, Application.currentTime);
 
         }  // end - loadAll()
     }
