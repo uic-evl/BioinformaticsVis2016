@@ -161,7 +161,7 @@ Application.twoDV = Application.twoDV || {};
                     /* Initialize tooltip */
                     var tip = d3.tip().attr('class', 'd3-tip').html(
                         function(d, i) {
-                            
+
                             // number formatter
                             var format = d3.format(".3e");
 
@@ -184,7 +184,6 @@ Application.twoDV = Application.twoDV || {};
 
             update2DHeatMap : function (t, colors) {
 
-                console.log(pMax-increment*4);
                 if(Application.show_qualitative)
                 {
                     projectionTwoD
