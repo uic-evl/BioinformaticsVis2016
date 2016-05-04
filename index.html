@@ -73,6 +73,9 @@
                                 <div class="col-md-6">
                                     <input type="checkbox" name="heatmap" > <span>Qual. Heat Map</span>
                                 </div>
+                                <div class="col-md-6">
+                                    <input type="checkbox" name="animation" > <span>Run Animation</span>
+                                </div>
                                 <!--<div class="col-md-6">-->
                                     <!--<input type="checkbox" name="currentTime" > Show Current Time-->
                                 <!--</div>-->
@@ -375,8 +378,31 @@
                             pBC.update2DHeatMap(Application.currentTime, colorbrewer.Set1["4"]);
                             pAC.update2DHeatMap(Application.currentTime, colorbrewer.Set1["4"]);
                         }
-
+                        else if(this.name == 'animation')
+                        {
+                            Application.show_animation = !Application.show_animation;
+                        }
+                        
                     });
+            
+            function frame() {
+                if (Application.show_animation) {
+                    Application.currentTime = (Application.currentTime+1) % Application.TimeStep;
+                    
+                    pAB.update2DHeatMap(Application.currentTime, colorbrewer.Set1["4"]);
+                    pBC.update2DHeatMap(Application.currentTime, colorbrewer.Set1["4"]);
+                    pAC.update2DHeatMap(Application.currentTime, colorbrewer.Set1["4"]);
+                    
+                    var plotlyPab = Application.utils.convert4plotly(Pab_t20, Pa_t20.length, Pb_t20.length, 2);
+                    var plotlyPac = Application.utils.convert4plotly(Pac_t20, Pa_t20.length, Pc_t20.length, 2);
+                    var plotlyPbc = Application.utils.convert4plotly(Pbc_t20, Pb_t20.length, Pc_t20.length, 2);
+            
+                    Plotly.newPlot('plotyly3dAB', [plotlyPab]); 
+                    Plotly.newPlot('plotyly3dAC', [plotlyPac]); 
+                    Plotly.newPlot('plotyly3dBC', [plotlyPbc]); 
+                }
+            }
+            var id = setInterval(frame, 100) // draw every 100ms
 
             /************* Initial Render ********************************************/
             Application.oneDV.drawAxis(xMax_oneD, yMax_oneD);  // draw X/Y-axis
