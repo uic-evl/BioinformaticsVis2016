@@ -429,9 +429,9 @@ Application.oneDV = Application.oneDV || {};
         renderLineGraphs: function(headerRow_oneD) {
 
             for (var i = 0; i < Application.TimeStep; i++) {
-                this.drawLineGraph(Application.data["Pa"], headerRow_oneD[0], headerRow_oneD[i+1], d3.hsl(5, 0.9, 0.55+(Application.TimeStep-i-1)*0.3/Application.TimeStep));
-                this.drawLineGraph(Application.data["Pb"], headerRow_oneD[0], headerRow_oneD[i+1], d3.hsl(105, 0.9, 0.55+(Application.TimeStep-i-1)*0.3/Application.TimeStep));
-                this.drawLineGraph(Application.data["Pc"], headerRow_oneD[0], headerRow_oneD[i+1], d3.hsl(225, 0.9, 0.55+(Application.TimeStep-i-1)*0.3/Application.TimeStep));
+                this.drawLineGraph(Application.data["Pa"], headerRow_oneD[0], headerRow_oneD[i+1], d3.hsl(162, 0.71, 0.36+(Application.TimeStep-i-1)*0.3/Application.TimeStep));
+                this.drawLineGraph(Application.data["Pb"], headerRow_oneD[0], headerRow_oneD[i+1], d3.hsl(26, 0.98, 0.43+(Application.TimeStep-i-1)*0.3/Application.TimeStep));
+                this.drawLineGraph(Application.data["Pc"], headerRow_oneD[0], headerRow_oneD[i+1], d3.hsl(244, 0.31, 0.57+(Application.TimeStep-i-1)*0.3/Application.TimeStep));
             }
         },
 
