@@ -43,11 +43,18 @@
 
         <div class="col-md-3">
             <!--Second Row - Controls-->
-            <div class="row top-buffer">
+            <div class="row">
                 <!--First Column-->
                 <div class="col-md-12">
-                    <!--Time slider Row-->
+                    <!--Project Title Row-->
                     <div class="row">
+                        <div class="col-md-8 col-md-offset-0">
+                            <h3 style="visibility: hidden">ProbExplorer</h3>
+                            <h4 style="visibility: hidden">Visualizing probability landscape of a stochastic gene regulatory network in state and time space</h4>
+                        </div>
+                    </div>
+                    <!--Time slider Row-->
+                    <div class="row top-buffer3">
                         <div class="col-md-8 col-md-offset-3">
                             <h4 style="visibility: hidden">Time Slider</h4>
                         </div>
@@ -57,8 +64,8 @@
                             <div id="timeSlider"></div>
                         </div>
                     </div>
-                    <!--Button Column-->
 
+                    <!--Button Column-->
                     <div id="buttons" class="row top-buffer" style="visibility: hidden">
                         <div class="col-md-12">
                             <div class="row">
@@ -348,6 +355,7 @@
                             .on("slideend", brushed));
 
             // show the labels
+            d3.selectAll('h3').style({visibility: 'visible'});
             d3.selectAll('h4').style({visibility: 'visible'});
 
             var buttons = d3.select("#buttons").style({visibility: 'visible'})

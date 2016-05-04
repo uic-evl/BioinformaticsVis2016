@@ -456,9 +456,9 @@ Application.oneDV = Application.oneDV || {};
                 Application.shiftY*1.5 + deltaY*2, lineGraphWidth/(xMax_oneD*1.25), deltaY * 0.8, 2, Pabc_t20, probMax3D,
                 xMaxP, Application.shiftX*2, Application.main_width*2/5 - Application.shiftX*5, "C");
 
-            this.outerline(Application.shiftY*1.5, lineGraphWidth*(xMaxP[0]+1)/(xMax_oneD*1.25), deltaY * 0.8, d3.hsl(5, 0.9, 0.55));
-            this.outerline(Application.shiftY*1.5 + deltaY , lineGraphWidth*(xMaxP[1]+1)/(xMax_oneD*1.25), deltaY * 0.8 , d3.hsl(105, 0.9, 0.55));
-            this.outerline(Application.shiftY*1.5 + deltaY * 2 , lineGraphWidth*(xMaxP[2]+1)/(xMax_oneD*1.25), deltaY * 0.8, d3.hsl(225, 0.9, 0.55));
+            this.outerline(Application.shiftY*1.5, lineGraphWidth*(xMaxP[0]+1)/(xMax_oneD*1.25), deltaY * 0.8, d3.hsl(162, 0.71, 0.36));
+            this.outerline(Application.shiftY*1.5 + deltaY , lineGraphWidth*(xMaxP[1]+1)/(xMax_oneD*1.25), deltaY * 0.8 , d3.hsl(26, 0.98, 0.43));
+            this.outerline(Application.shiftY*1.5 + deltaY * 2 , lineGraphWidth*(xMaxP[2]+1)/(xMax_oneD*1.25), deltaY * 0.8, d3.hsl(244, 0.31, 0.57));
         }
 
     };
