@@ -38,5 +38,6 @@ var Application = Application ||  {};
     Application.show_peaks = false;
     Application.show_detailTwoD = false;
     Application.show_qualitative = false;
+    Application.show_animation = false;
 
 })();
