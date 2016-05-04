@@ -5,6 +5,7 @@ path {
 .axis path, .axis line{
     stroke: black;
 }
+
 .axis .label {
     font-size: 12pt;
 }
@@ -18,7 +19,7 @@ rect {
 }
 
 .time_axis {
-    font: 12px sans-serif;
+    font: 14px sans-serif;
     -webkit-user-select: none;
     -moz-user-select: none;
     user-select: none;
@@ -48,3 +49,28 @@ rect {
 
 .top-buffer { margin-top:40px; }
 .top-buffer2 { margin-top:20px; }
+
+h4 {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* Medium devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+    span {
+        font-size: 1vw !important;
+    }
+    #timeSlider .tick {
+        font-size: 0.25vw !important;
+    }
+}
+
+/* Large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+    span {
+        font-size: 0.75vw !important;
+    }
+    #timeSlider .tick {
+        font-size: 1vw !important;
+    }
+}

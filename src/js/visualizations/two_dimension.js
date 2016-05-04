@@ -82,20 +82,24 @@ Application.twoDV = Application.twoDV || {};
                 var xAxisG = projectionTwoD.append("g")
                     .attr("transform", "translate(0," + (twoDHeatMapHeight) + ")")
                     .attr("class", "x axis");
+
                 var yAxisG = projectionTwoD.append("g")
+                    .attr("transform", "translate(0, 0)")
                     .attr("class", "y axis");
 
                 xAxisG.call(xAxis)
                     .append("text")
-                    .style("text-anchor", "left")
+                    .style("text-anchor", "middle")
                     .attr("transform", "translate(" + (twoDHeatMapWidth/2) + "," + "" + 50 + ")")
                     .attr("class", "label")
                     .text(xLabelText);
 
                 yAxisG.call(yAxis)
+                    .append("g")
+                        .attr('transform', 'translate(-35,' + twoDHeatMapHeight/2 + ')')
                     .append("text")
                     .style("text-anchor", "middle")
-                    .attr("transform", "translate(" + 0 + "," + (-15) + ")")
+                    .attr("transform", "rotate(-90)")
                     .attr("class", "label")
                     .text(yLabelText);
             },
@@ -179,7 +183,6 @@ Application.twoDV = Application.twoDV || {};
                         .on('mouseover', tip.show)
                         .on('mouseout', tip.hide);
                 }
-
             },
 
             update2DHeatMap : function (t, colors) {
@@ -261,6 +264,7 @@ Application.twoDV = Application.twoDV || {};
                 yScale_twoD.domain([0, yMax]);  
 
                 projectionTwoD.append("g")
+                    .attr("transform", "translate(0," + (0) + ")")
                     .selectAll("rect")
                         .data(Application.data[data])
                             .enter().append("rect")
@@ -309,7 +313,9 @@ Application.twoDV = Application.twoDV || {};
                     self.drawCell(clickedState, pMax, headerRow_twoD[0], headerRow_twoD[1]);
                 }
 
-                this.draw2DAxis(xMax, yMax, headerRow_twoD[1], headerRow_twoD[0]);
+                var xLabel = headerRow_twoD[1] + " (Molecules)";
+                var yLabel = headerRow_twoD[0] + " (Molecules)";
+                this.draw2DAxis(xMax, yMax, xLabel, yLabel);
 
                 // draw legend
                 // draw legend

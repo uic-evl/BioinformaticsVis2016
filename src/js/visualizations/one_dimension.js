@@ -13,7 +13,7 @@ Application.oneDV = Application.oneDV || {};
     var lineGraphHeight = -1;//Application.main_height / 2;
 
     var xAxisLabelText = "Number of Molecules";
-    var yAxisLabelText = "Probability";
+    var yAxisLabelText = "Probability (%)";
     var xScale = null;//d3.scale.linear().range([0, lineGraphWidth]);
     var yScale = null;//d3.scale.linear().range([lineGraphHeight, 0]);
 
@@ -60,12 +60,13 @@ Application.oneDV = Application.oneDV || {};
         drawAxis: function(xMax, yMax) {
 
             var chartHeight = lineGraphHeight;
+            console.log(chartHeight/2);
 
             xScale.domain([0, xMax]);
             yScale.domain([0, yMax]);
 
             var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
-            var yAxis = d3.svg.axis().scale(yScale).orient("left");
+            var yAxis = d3.svg.axis().orient("left").scale(yScale);
 
             var xAxisG = projectionOneD.append("g")
                 .attr("transform", "translate(0," + chartHeight + ")")
@@ -83,11 +84,14 @@ Application.oneDV = Application.oneDV || {};
                 .text(xAxisLabelText);
 
             yAxisG.call(yAxis)
+                .append("g")
+                    .attr('transform', 'translate(-55,' + chartHeight/2 + ')')
                 .append("text")
-                .style("text-anchor", "middle")
-                .attr("transform", "translate(" + 0 + "," + (-5) + ")")
-                .attr("class", "label")
-                .text(yAxisLabelText);
+                    .style("text-anchor", "middle")
+                    .attr("dy", ".75em")
+                    .attr("transform", "rotate(-90)")
+                    .attr("class", "label")
+                    .text(yAxisLabelText);
 
             var legend = projectionOneD.append("g");
             legend.append("line")
