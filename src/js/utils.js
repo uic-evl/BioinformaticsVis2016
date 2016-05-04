@@ -48,6 +48,20 @@ Application.utils = Application.utils || {};
             }
             return peaks;
             //return peak_num;
+        },
+        
+        // convert the data to the format used in Plotly
+        convert4plotly :  function (data, rows, columns, shift) {
+            var prob = [];
+            for (var i=0; i<rows; i++) {
+                var prob_row = [];
+                for (var j = 0; j < columns; j++) {                     
+                    prob_row.push(d3.values(data[i*columns+j])[Application.currentTime+shift]); 
+                }
+                prob.push(prob_row);
+            }
+            var data_new = {z: prob, type: 'surface'};
+            return data_new;
         }
     };
 

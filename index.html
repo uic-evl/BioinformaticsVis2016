@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Test</title>
+    <title>ProbExplorer</title>
     <!-- Stylesheets-->
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="src/css/main.css">
@@ -21,6 +21,7 @@
 
     <script src="http://d3js.org/queue.v1.min.js"></script>
     <script src="http://colorbrewer2.org/export/colorbrewer.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="lib/js/d3.slider.js"></script>
     <script src="lib/js/d3-tip.js"></script>
 
@@ -119,7 +120,7 @@
 
         </div>
     </div>
-
+    
     <div class="row">
         <div class="col-md-4">
             <svg id="heatmapAB"></svg>
@@ -132,7 +133,19 @@
         </div>
     </div>
 
+    <div class="row">
+        <div class="col-md-4"> 
+            <div id="plotyly3dAB" style="width:100%;height:60%"></div>
+        </div>
+        <div class="col-md-4">
+            <div id="plotyly3dAC" style="width:100%;height:60%"></div>
+        </div>
+        <div class="col-md-4">
+            <div id="plotyly3dBC" style="width:100%;height:60%"></div>
+        </div>
+    </div>
 </div>
+
 
 <script>
 
@@ -312,6 +325,15 @@
 
                     toggleLines(evt);
                 }
+                
+                /************* 3D Surface Plots ********************************************/
+                var plotlyPab = Application.utils.convert4plotly(Pab_t20, Pa_t20.length, Pb_t20.length, 2);
+                var plotlyPac = Application.utils.convert4plotly(Pac_t20, Pa_t20.length, Pc_t20.length, 2);
+                var plotlyPbc = Application.utils.convert4plotly(Pbc_t20, Pb_t20.length, Pc_t20.length, 2);
+            
+                Plotly.newPlot('plotyly3dAB', [plotlyPab]); 
+                Plotly.newPlot('plotyly3dAC', [plotlyPac]); 
+                Plotly.newPlot('plotyly3dBC', [plotlyPbc]); 
             }
 
             d3.select('#timeSlider')
@@ -367,6 +389,15 @@
             pBC.draw2DHeatMap("Pac", probMax2D, Application.currentTime);
             pAC.draw2DHeatMap("Pbc", probMax2D, Application.currentTime);
 
+            /************* 3D Surface Plots ********************************************/
+            var plotlyPab = Application.utils.convert4plotly(Pab_t20, Pa_t20.length, Pb_t20.length, 2);
+            var plotlyPac = Application.utils.convert4plotly(Pac_t20, Pa_t20.length, Pc_t20.length, 2);
+            var plotlyPbc = Application.utils.convert4plotly(Pbc_t20, Pb_t20.length, Pc_t20.length, 2);
+            
+            Plotly.newPlot('plotyly3dAB', [plotlyPab]); 
+            Plotly.newPlot('plotyly3dAC', [plotlyPac]); 
+            Plotly.newPlot('plotyly3dBC', [plotlyPbc]); 
+            
         }  // end - loadAll()
     }
     /************************************************************************************/
