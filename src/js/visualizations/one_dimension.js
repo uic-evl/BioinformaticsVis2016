@@ -99,13 +99,13 @@ Application.oneDV = Application.oneDV || {};
                 .attr("y1", Application.shiftY)
                 .attr("x2", lineGraphWidth - Application.shiftX*1.5)
                 .attr("y2", Application.shiftY)
-                .attr("stroke", d3.hsl(5, 0.9, 0.55));
+                .attr("stroke", d3.hsl(162, 0.71, 0.36));
 
             legend.append("text")
                 .style("text-anchor", "left")
                 .attr("transform", "translate(" + (lineGraphWidth - Application.shiftX*1.5 +5) + "," + Application.shiftY + ")")
                 .attr("font-size", "12pt")
-                .attr("fill", d3.hsl(5, 0.9, 0.55))
+                .attr("fill", d3.hsl(162, 0.71, 0.36))
                 .text("Protein A");
 
             legend.append("line")
@@ -113,13 +113,13 @@ Application.oneDV = Application.oneDV || {};
                 .attr("y1", Application.shiftY*2)
                 .attr("x2", lineGraphWidth - Application.shiftX*1.5)
                 .attr("y2", Application.shiftY*2)
-                .attr("stroke", d3.hsl(105, 0.9, 0.55));
+                .attr("stroke", d3.hsl(26, 0.98, 0.43));
 
             legend.append("text")
                 .style("text-anchor", "left")
                 .attr("transform", "translate(" + (lineGraphWidth - Application.shiftX*1.5 +5) + "," + Application.shiftY*2 + ")")
                 .attr("font-size", "12pt")
-                .attr("fill", d3.hsl(105, 0.9, 0.55))
+                .attr("fill", d3.hsl(26, 0.98, 0.43))
                 .text("Protein B");
 
             legend.append("line")
@@ -127,13 +127,13 @@ Application.oneDV = Application.oneDV || {};
                 .attr("y1", Application.shiftY*3)
                 .attr("x2", lineGraphWidth - Application.shiftX*1.5)
                 .attr("y2", Application.shiftY*3)
-                .attr("stroke", d3.hsl(225, 0.9, 0.55));
+                .attr("stroke", d3.hsl(244, 0.31, 0.57));
 
             legend.append("text")
                 .style("text-anchor", "left")
                 .attr("transform", "translate(" + (lineGraphWidth - Application.shiftX*1.5 +5) + "," + Application.shiftY*3 + ")")
                 .attr("font-size", "12pt")
-                .attr("fill", d3.hsl(225, 0.9, 0.55))
+                .attr("fill", d3.hsl(244, 0.31, 0.57))
                 .text("Protein C");
         },
 
