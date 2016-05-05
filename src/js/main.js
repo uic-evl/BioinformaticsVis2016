@@ -254,12 +254,15 @@ function start() {
 
             /* update the data and redraw */
             AB3d.data = [plotlyPab];
+            AB3d.layout.scene = {xaxis: {title: "ProteinB"}, yaxis: {title: "ProteinA"}, zaxis: {title: "Prob."} };
             Plotly.redraw(AB3d, AB3d.layout);
 
             AC3d.data = [plotlyPac];
+            AC3d.layout.scene = {xaxis: {title: "ProteinC"}, yaxis: {title: "ProteinA"}, zaxis: {title: "Prob."} };
             Plotly.redraw(AC3d, AC3d.layout);
 
             BC3d.data = [plotlyPbc];
+            BC3d.layout.scene = {xaxis: {title: "ProteinC"}, yaxis: {title: "ProteinB"}, zaxis: {title: "Prob."} };
             Plotly.redraw(BC3d, BC3d.layout);
         }
 
@@ -332,12 +335,15 @@ function start() {
 
                 /* update the data and redraw */
                 AB3d.data = [plotlyPab];
+                AB3d.layout.scene = {xaxis: {title: "ProteinB"}, yaxis: {title: "ProteinA"}, zaxis: {title: "Prob."} };
                 Plotly.redraw(AB3d, AB3d.layout);
 
                 AC3d.data = [plotlyPac];
+                AC3d.layout.scene = {xaxis: {title: "ProteinC"}, yaxis: {title: "ProteinA"}, zaxis: {title: "Prob."} };
                 Plotly.redraw(AC3d, AC3d.layout);
 
                 BC3d.data = [plotlyPbc];
+                BC3d.layout.scene = {xaxis: {title: "ProteinC"}, yaxis: {title: "ProteinB"}, zaxis: {title: "Prob."} };
                 Plotly.redraw(BC3d, BC3d.layout);
             }
         }
