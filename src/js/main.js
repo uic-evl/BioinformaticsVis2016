@@ -89,12 +89,18 @@ function start() {
 
     var layout = {
         height: Application.main_height - Application.margin * 2,
-        xaxis: {
-            title: "A"
+        scene: {
+            xaxis: {
+                title: "Temp"
+            },
+            yaxis: {
+                title: "Temp"
+            },
+            zaxis: {
+                title: "Temp"
+            }
         },
-        yaxis: {
-            title: 'ProteinB'
-        },
+
         margin: {
             t: 20
         }
@@ -350,8 +356,13 @@ function start() {
 
         /************* 3D Surface Plots ********************************************/
 
+        layout.scene = {xaxis: {title: "ProteinB"}, yaxis: {title: "ProteinA"}, zaxis: {title: "Prob."}};
         Plotly.newPlot(AB3d, [plotlyPab], layout, {displayModeBar: false});
+
+        layout.scene = {xaxis: {title: "ProteinB"}, yaxis: {title: "ProteinC"}, zaxis: {title: "Prob."}};
         Plotly.newPlot(AC3d, [plotlyPac], layout, {displayModeBar: false});
+
+        layout.scene = {xaxis: {title: "ProteinA"}, yaxis: {title: "ProteinC"}, zaxis: {title: "Prob."}};
         Plotly.newPlot(BC3d, [plotlyPbc], layout, {displayModeBar: false});
 
     }  // end - loadAll()
