@@ -60,7 +60,7 @@ Application.utils = Application.utils || {};
                 }
                 prob.push(prob_row);
             }
-            var data_new = {z: prob, type: 'surface'};
+            var data_new = {z: prob, colorscale: [[0, '#F2E1D9'], [1, '#F95706']], type: 'surface'};
             return data_new;
         }
     };
