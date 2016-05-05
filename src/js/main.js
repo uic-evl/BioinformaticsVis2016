@@ -85,8 +85,20 @@ function start() {
         .attr("height", Application.main_height - Application.margin * 2)
         .append("g");
 
-    /*** Set 3D container width/height ***/
+    /*** Set 3D layout ***/
 
+    var layout = {
+        height: Application.main_height - Application.margin * 2,
+        xaxis: {
+            title: "A"
+        },
+        yaxis: {
+            title: 'ProteinB'
+        },
+        margin: {
+            t: 20
+        }
+    };
     // d3.select('#plotyly3dAB').attr("height", Application.main_height - Application.margin * 2);
     // d3.select('#plotyly3dAC').attr("height", Application.main_height - Application.margin * 2);
     // d3.select('#plotyly3dBC').attr("height", Application.main_height - Application.margin * 2);
@@ -235,9 +247,9 @@ function start() {
             var plotlyPac = Application.utils.convert4plotly(Pac_t20, Pa_t20.length, Pc_t20.length, 2);
             var plotlyPbc = Application.utils.convert4plotly(Pbc_t20, Pb_t20.length, Pc_t20.length, 2);
 
-            Plotly.newPlot('plotyly3dAB', [plotlyPab]);
-            Plotly.newPlot('plotyly3dAC', [plotlyPac]);
-            Plotly.newPlot('plotyly3dBC', [plotlyPbc]);
+            Plotly.newPlot('plotyly3dAB', [plotlyPab], layout);
+            Plotly.newPlot('plotyly3dAC', [plotlyPac], layout);
+            Plotly.newPlot('plotyly3dBC', [plotlyPbc, layout]);
         }
 
         d3.select('#timeSlider')
@@ -300,9 +312,9 @@ function start() {
                 var plotlyPac = Application.utils.convert4plotly(Pac_t20, Pa_t20.length, Pc_t20.length, 2);
                 var plotlyPbc = Application.utils.convert4plotly(Pbc_t20, Pb_t20.length, Pc_t20.length, 2);
 
-                Plotly.newPlot('plotyly3dAB', [plotlyPab]);
-                Plotly.newPlot('plotyly3dAC', [plotlyPac]);
-                Plotly.newPlot('plotyly3dBC', [plotlyPbc]);
+                Plotly.newPlot('plotyly3dAB', [plotlyPab], layout);
+                Plotly.newPlot('plotyly3dAC', [plotlyPac], layout);
+                Plotly.newPlot('plotyly3dBC', [plotlyPbc], layout);
             }
         }
 
@@ -318,19 +330,6 @@ function start() {
         pAC.draw2DHeatMap("Pbc", probMax2D, Application.currentTime);
 
         /************* 3D Surface Plots ********************************************/
-
-        var layout = {
-            height: Application.main_height - Application.margin * 2,
-            xaxis: {
-                title: "A"
-            },
-            yaxis: {
-                title: 'ProteinB'
-            },
-            margin: {
-                t: 20
-            }
-        };
 
         Plotly.newPlot('plotyly3dAB', [plotlyPab], layout);
         Plotly.newPlot('plotyly3dAC', [plotlyPac], layout);
