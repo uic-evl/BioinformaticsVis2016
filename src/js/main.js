@@ -104,7 +104,6 @@ function start() {
     var AC3d = document.getElementById('plotyly3dAC');
     var BC3d = document.getElementById('plotyly3dBC');
 
-
     /************************************************************************************/
 
 
@@ -192,8 +191,8 @@ function start() {
         Application.oneDV.initialize(oneD_svg);
 
         pAB.initialize(twoD_AB_svg, 'Pab');
-        pBC.initialize(twoD_AC_svg, 'Pac');
-        pAC.initialize(twoD_BC_svg, 'Pbc');
+        pBC.initialize(twoD_AC_svg, 'Pbc');
+        pAC.initialize(twoD_BC_svg, 'Pac');
 
         var plotlyPab = Application.utils.convert4plotly(Pab_t20, Pa_t20.length, Pb_t20.length, 2);
         var plotlyPac = Application.utils.convert4plotly(Pac_t20, Pa_t20.length, Pc_t20.length, 2);
@@ -249,13 +248,13 @@ function start() {
 
             /* update the data and redraw */
             AB3d.data = [plotlyPab];
-            Plotly.redraw('plotyly3dAB', AB3d.layout);
+            Plotly.redraw(AB3d, AB3d.layout);
 
             AC3d.data = [plotlyPac];
-            Plotly.redraw('plotyly3dAC', AC3d.layout);
+            Plotly.redraw(AC3d, AC3d.layout);
 
             BC3d.data = [plotlyPbc];
-            Plotly.redraw('plotyly3dBC', BC3d.layout);
+            Plotly.redraw(BC3d, BC3d.layout);
         }
 
         /***** Setup the time slider ****/
@@ -327,13 +326,13 @@ function start() {
 
                 /* update the data and redraw */
                 AB3d.data = [plotlyPab];
-                Plotly.redraw('plotyly3dAB', AB3d.layout);
+                Plotly.redraw(AB3d, AB3d.layout);
 
                 AC3d.data = [plotlyPac];
-                Plotly.redraw('plotyly3dAC', AC3d.layout);
+                Plotly.redraw(AC3d, AC3d.layout);
 
                 BC3d.data = [plotlyPbc];
-                Plotly.redraw('plotyly3dBC', BC3d.layout);
+                Plotly.redraw(BC3d, BC3d.layout);
             }
         }
         var id = setInterval(frame, 100); // draw every 100ms
