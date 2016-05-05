@@ -349,14 +349,17 @@ Application.oneDV = Application.oneDV || {};
 
             // the width of the container
             var maxWidth =  projectionOneD_peaks.attr('width');
-                maxHeight =   projectionOneD_peaks.attr('height');// - Application.shiftY,
+                maxHeight =   projectionOneD_peaks.attr('height');
 
+            // width and height of the peaks
             var length = maxWidth / 7.5;
-
             var height = length / Application.protein_type;
 
+            // iterative x and y starting positions
             var xPos = 0;
             var yPos = 0;
+
+            var invalidPeaks = 0;
 
             for (var i = 0; i < peaks_Pa.length; i++) {
                 for (var j = 0; j < peaks_Pb.length; j++) {
@@ -370,14 +373,25 @@ Application.oneDV = Application.oneDV || {};
                         peaks.push(peaks_Pc[k].count);
 
                         var fillColor; // = d3.hsl(20, 0.9, 0.55);
-                        if(peaks_Pc[k].value != 0 && peaks_Pc[k].value < 1e-12)
+
+                        // invalid peaks
+                        if(peaks_Pc[k].value != 0 && peaks_Pc[k].value < 1e-12 && invalidPeaks < 5)
                         {
+                            // set the color of the peak to grey
                             fillColor = d3.hsl(0, 0, 0.86);
 
+                            // add the three values to the array
                             values.push(peaks_Pa[i]);
                             values.push(peaks_Pb[j]);
                             values.push(peaks_Pc[k]);
+
+                            // increment the number of invalid peaks
+                            invalidPeaks++;
                         }
+                        // we don't want to add invalid peaks after we hit 5
+                        else if(peaks_Pc[k].value != 0 && peaks_Pc[k].value < 1e-12 && invalidPeaks >= 5) continue;
+
+                        // valid peaks
                         else
                         {
                             for (var r = 0; r < Application.data["Pabc"].length; r++) {
