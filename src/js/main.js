@@ -251,10 +251,10 @@ function start() {
             AB3d.data = [plotlyPab];
             Plotly.redraw('plotyly3dAB', AB3d.layout);
 
-            AB3d.data = [plotlyPac];
+            AC3d.data = [plotlyPac];
             Plotly.redraw('plotyly3dAC', AC3d.layout);
 
-            AB3d.data = [plotlyPbc];
+            BC3d.data = [plotlyPbc];
             Plotly.redraw('plotyly3dBC', BC3d.layout);
         }
 
@@ -329,10 +329,10 @@ function start() {
                 AB3d.data = [plotlyPab];
                 Plotly.redraw('plotyly3dAB', AB3d.layout);
 
-                AB3d.data = [plotlyPac];
+                AC3d.data = [plotlyPac];
                 Plotly.redraw('plotyly3dAC', AC3d.layout);
 
-                AB3d.data = [plotlyPbc];
+                BC3d.data = [plotlyPbc];
                 Plotly.redraw('plotyly3dBC', BC3d.layout);
             }
         }
