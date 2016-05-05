@@ -36,14 +36,15 @@ Application.twoDV = Application.twoDV || {};
                 // reference to scope
                 self = this;
 
-                twoDHeatMapWidth =  main.node().parentNode.clientWidth - 5 * Application.margin;
-                twoDHeatMapHeight = Application.main_height - Application.margin * 6  - Application.shiftY;
+                twoDHeatMapWidth =  main.node().parentNode.clientWidth - Application.margin * 5;
+                twoDHeatMapHeight = Application.main_height - Application.margin * 5;
 
                 xScale_twoD = d3.scale.linear().range([0, twoDHeatMapWidth]);
                 yScale_twoD = d3.scale.linear().range([twoDHeatMapHeight, 0]);
 
                 projectionTwoD = main.append("g")
-                    .attr("transform", "translate(" + Application.shiftX + "," + ( Application.shiftY + Application.margin ) + ")");
+                    .attr("height", twoDHeatMapHeight)
+                    .attr("transform", "translate(" + Application.shiftX + "," + ( Application.margin ) + ")");
 
                 legend = projectionTwoD.append("g").attr("class", "HeatMap");
                 label = data;
@@ -73,9 +74,6 @@ Application.twoDV = Application.twoDV || {};
             // draw x/y-axis
             draw2DAxis: function (xMax, yMax, xLabelText, yLabelText) {
 
-                xScale_twoD.domain([0, xMax]);
-                yScale_twoD.domain([0, yMax]);
-
                 var xAxis = d3.svg.axis().scale(xScale_twoD).orient("bottom");
                 var yAxis = d3.svg.axis().scale(yScale_twoD).orient("left");
 
@@ -87,10 +85,13 @@ Application.twoDV = Application.twoDV || {};
                     .attr("transform", "translate(0, 0)")
                     .attr("class", "y axis");
 
+                xScale_twoD.domain([0, xMax]);
+                yScale_twoD.domain([0, yMax]);
+
                 xAxisG.call(xAxis)
                     .append("text")
                     .style("text-anchor", "middle")
-                    .attr("transform", "translate(" + (twoDHeatMapWidth/2) + "," + "" + 50 + ")")
+                    .attr("transform", "translate(" + (twoDHeatMapWidth/2) + "," + "" + 35 + ")")
                     .attr("class", "label")
                     .text(xLabelText);
 
@@ -260,6 +261,9 @@ Application.twoDV = Application.twoDV || {};
 
             draw2DHeatMap: function (data, pMax0, t) {
 
+                var xLabel = headerRow_twoD[1] + " (Molecules)";
+                var yLabel = headerRow_twoD[0] + " (Molecules)";
+
                 xScale_twoD.domain([0, xMax]);
                 yScale_twoD.domain([0, yMax]);  
 
@@ -308,13 +312,11 @@ Application.twoDV = Application.twoDV || {};
 
                 } // end - if
 
-                //console.log("Application.show_detailTwoD: " + Application.show_detailTwoD);
                 if (Application.show_detailTwoD) {
                     self.drawCell(clickedState, pMax, headerRow_twoD[0], headerRow_twoD[1]);
                 }
 
-                var xLabel = headerRow_twoD[1] + " (Molecules)";
-                var yLabel = headerRow_twoD[0] + " (Molecules)";
+
                 this.draw2DAxis(xMax, yMax, xLabel, yLabel);
 
                 // draw legend

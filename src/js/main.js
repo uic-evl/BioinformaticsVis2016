@@ -45,13 +45,15 @@ var Application = Application ||  {};
 /************************************************************************************/
 function start() {
 
+    /**** Window Height ****/
     Application.outerHeight = Math.max( Application.body.scrollHeight || 0, Application.body.offsetHeight ||0,
         Application.html.clientHeight || 0, Application.html.scrollHeight || 0, Application.html.offsetHeight ||0 );
 
-    // main view
+    /**** Main View Height and Width ****/
     Application.main_width = (Application.outerWidth - Application.margin*3) * 5 / 6;
-    Application.main_height =  (Application.outerHeight - Application.margin) / 2 ;
+    Application.main_height =  (Application.outerHeight - Application.margin * 2) / 2.5 ;
 
+    /**** 1D Container ****/
     var prob_div = d3.select("#probability");
 
     var oneD_svg = prob_div
@@ -59,38 +61,39 @@ function start() {
         .attr("height", Application.main_height - Application.margin * 3)
         .append('g');
 
+    /**** 2D Containers ****/
     var heatmapAB_div = d3.select("#heatmapAB");
     var heatmapAC_div = d3.select("#heatmapAC");
     var heatmapBC_div = d3.select("#heatmapBC");
 
-    var twoD_AB_svg = heatmapAB_div
-        .attr("width",  heatmapAC_div.node().parentNode.clientWidth - Application.margin)
-        .attr("height", Application.main_height - Application.margin * 3)
-        .append("g");
-
-    var twoD_AC_svg = heatmapAC_div
-        .attr("width",  heatmapAC_div.node().parentNode.clientWidth - Application.margin)
-        .attr("height", Application.main_height - Application.margin * 3)
-        .append("g");
-
-    var twoD_BC_svg = heatmapBC_div
-        .attr("width",  heatmapBC_div.node().parentNode.clientWidth - Application.margin)
-        .attr("height", Application.main_height - Application.margin * 3)
-        .append("g");
-
-    var controlPanel_width = (Application.main_width- Application.margin*3) / 6;
-
-    /************************************************************************************/
-    // 1D projection
-
-    Application.oneDV.initialize(oneD_svg);
-
-    // 2D projection
     var pAB = Application.twoDV();
     var pBC = Application.twoDV();
     var pAC = Application.twoDV();
 
+    var twoD_AB_svg = heatmapAB_div
+        .attr("width",  heatmapAC_div.node().parentNode.clientWidth - Application.margin)
+        .attr("height", Application.main_height - Application.margin * 2)
+        .append("g");
+
+    var twoD_AC_svg = heatmapAC_div
+        .attr("width",  heatmapAC_div.node().parentNode.clientWidth - Application.margin)
+        .attr("height", Application.main_height - Application.margin * 2)
+        .append("g");
+
+    var twoD_BC_svg = heatmapBC_div
+        .attr("width",  heatmapBC_div.node().parentNode.clientWidth - Application.margin)
+        .attr("height", Application.main_height - Application.margin * 2)
+        .append("g");
+
+    /*** Set 3D container width/height ***/
+
+    // d3.select('#plotyly3dAB').attr("height", Application.main_height - Application.margin * 2);
+    // d3.select('#plotyly3dAC').attr("height", Application.main_height - Application.margin * 2);
+    // d3.select('#plotyly3dBC').attr("height", Application.main_height - Application.margin * 2);
+
     /************************************************************************************/
+
+
     /************************************************************************************/
     // load multiple files and draw
     queue()
@@ -148,9 +151,7 @@ function start() {
 
         Application.data["Pabc"] = Pabc_t20;
 
-        pAB.initialize(twoD_AB_svg, 'Pab');
-        pBC.initialize(twoD_AC_svg, 'Pac');
-        pAC.initialize(twoD_BC_svg, 'Pbc');
+
 
         var headerRow_oneD = Object.keys(Pa_t20[0]);  // get keys from the first row
         var headerRow_twoD = Object.keys(Pab_t20[0]);  // get keys from the first row
@@ -172,18 +173,28 @@ function start() {
 
         var probMax3D = Application.utils.findMax(Pabc_t20, headerRow_threeD, 3);
 
+
+        /*******Initialization*********/
+
+        // 1D projection
+        Application.oneDV.initialize(oneD_svg);
+
+        pAB.initialize(twoD_AB_svg, 'Pab');
+        pBC.initialize(twoD_AC_svg, 'Pac');
+        pAC.initialize(twoD_BC_svg, 'Pbc');
+
+        var plotlyPab = Application.utils.convert4plotly(Pab_t20, Pa_t20.length, Pb_t20.length, 2);
+        var plotlyPac = Application.utils.convert4plotly(Pac_t20, Pa_t20.length, Pc_t20.length, 2);
+        var plotlyPbc = Application.utils.convert4plotly(Pbc_t20, Pb_t20.length, Pc_t20.length, 2);
+        /************************************************************************************/
+
         /************************************************************************************/
         // time slider
         var startingTime = 0;
         Application.currentTime = 0;
 
-        var timeX = d3.scale.linear().domain([0, Application.TimeStep-1])
-            .range([0, controlPanel_width - Application.margin*2]).clamp(true);
-
         function toggleLines(evt)
         {
-            console.log("toggleLines");
-
             var selector = "path:not(.time" + Application.currentTime + ")";
 
             // only show the line corresponding to the
@@ -240,6 +251,7 @@ function start() {
         // show the labels
         d3.selectAll('h3').style({visibility: 'visible'});
         d3.selectAll('h4').style({visibility: 'visible'});
+        d3.selectAll('hr').style({visibility: 'visible'});
 
         var buttons = d3.select("#buttons").style({visibility: 'visible'})
             .selectAll('input')
@@ -293,9 +305,8 @@ function start() {
                 Plotly.newPlot('plotyly3dBC', [plotlyPbc]);
             }
         }
-        var id = setInterval(frame, 100) // draw every 100ms
 
-        /************* Initial Render ********************************************/
+        /************************ Initial Render *********************************/
         Application.oneDV.drawAxis(xMax_oneD, yMax_oneD);  // draw X/Y-axis
 
         Application.oneDV.renderLineGraphs(headerRow_oneD);
@@ -307,13 +318,23 @@ function start() {
         pAC.draw2DHeatMap("Pbc", probMax2D, Application.currentTime);
 
         /************* 3D Surface Plots ********************************************/
-        var plotlyPab = Application.utils.convert4plotly(Pab_t20, Pa_t20.length, Pb_t20.length, 2);
-        var plotlyPac = Application.utils.convert4plotly(Pac_t20, Pa_t20.length, Pc_t20.length, 2);
-        var plotlyPbc = Application.utils.convert4plotly(Pbc_t20, Pb_t20.length, Pc_t20.length, 2);
 
-        Plotly.newPlot('plotyly3dAB', [plotlyPab]);
-        Plotly.newPlot('plotyly3dAC', [plotlyPac]);
-        Plotly.newPlot('plotyly3dBC', [plotlyPbc]);
+        var layout = {
+            height: Application.main_height - Application.margin * 2,
+            xaxis: {
+                title: "A"
+            },
+            yaxis: {
+                title: 'ProteinB'
+            },
+            margin: {
+                t: 20
+            }
+        };
+
+        Plotly.newPlot('plotyly3dAB', [plotlyPab], layout);
+        Plotly.newPlot('plotyly3dAC', [plotlyPac], layout);
+        Plotly.newPlot('plotyly3dBC', [plotlyPbc], layout);
 
     }  // end - loadAll()
 }

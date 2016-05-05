@@ -38,27 +38,23 @@
 
 <div class="container-fluid">
 
-    <!--Body of the page-->
+    <!--Top Row-->
     <div class="row">
 
-        <!-- 1D column-->
-        <div class="col-md-4">
-
-            <!-- Controls -->
+        <div class="col-md-3">
+            <!--First Row - Controls-->
             <div class="row">
                 <!--First Column-->
                 <div class="col-md-12">
-
+                    <!--Project Title Row-->
                     <div class="row">
-                        <div class="col-md-12 col-md-offset-0">
+                        <div class="col-md-8 col-md-offset-0">
                             <h3 style="visibility: hidden">ProbExplorer</h3>
                             <h4 style="visibility: hidden">Probability landscape of a stochastic gene regulatory networks</h4>
-                            <hr style="visibility: hidden">
                         </div>
                     </div>
-
                     <!--Time slider Row-->
-                    <div class="row">
+                    <div class="row top-buffer3">
                         <div class="col-md-8 col-md-offset-3">
                             <h4 style="visibility: hidden">Time Slider</h4>
                         </div>
@@ -94,130 +90,68 @@
                 </div>
 
             </div>
-            <hr style="visibility: hidden">
-            <!-- Line Chart -->
-            <div class="row top-buffer2">
-                <div class="col-md-12">
-                    <svg id="probability"></svg>
-                </div>
-            </div>
-            <!-- End Line Chart-->
-
-            <!-- Peak Distributions -->
-            <div class="row">
-                <div class="col-md-12">
-                    <!-- Label-->
-                    <div class="row">
-                        <div class="col-md-8 col-md-offset-3">
-                            <h4 style="visibility: hidden">Peak Distributions</h4>
-                        </div>
-                    </div>
-                    <!-- End Label-->
-
-                    <!--1D Distribution HeatMap-->
-                    <div class="row">
-                        <div class="col-md-12">
-                            <svg id="distribution1D"></svg>
-                        </div>
-                    </div>
-                    <!-- End 1D HeatMap-->
-                </div>
-            </div>
-            <!-- End Peak Distributions -->
-
-            <!-- Peak Glyphs -->
-            <div class="row">
-                <div class="col-md-12">
-
-                    <!-- Label -->
-                    <div class="row">
-                        <div class="col-md-6 col-md-offset-3">
-                            <h4 style="visibility: hidden">Peak Glyphs</h4>
-                        </div>
-                    </div>
-                    <!-- End Label-->
-
-                    <!--1D Peak Glyphs-->
-                    <div class="row">
-                        <div class="col-md-12">
-                            <svg id="peaks1D"></svg>
-                        </div>
-                    </div>
-                    <!--End 1D Peak Glyphs-->
-
-                </div>
-            </div>
-            <!-- End Peak Glyphs-->
-
         </div>
-        <!-- End 1D Column-->
 
-        <!-- 2D column-->
+        <!--First Column-->
+        <div class="col-md-5">
+            <svg id="probability"></svg>
+        </div>
+
+        <!--Second Column-->
         <div class="col-md-4">
 
-            <!-- AB Heatmap -->
             <div class="row">
-                <div class="col-md-12">
-                    <svg id="heatmapAB"></svg>
+                <div class="col-md-8 col-md-offset-3">
+                    <h4 style="visibility: hidden">Peak Distributions</h4>
                 </div>
             </div>
-            <!-- End AB Heatmap-->
 
-            <!-- AC Heatmap -->
+            <!--First Row - Heatmap-->
             <div class="row">
-                <div class="col-md-12">
-                    <svg id="heatmapAC"></svg>
+                <div class="col-md-4">
+                    <svg id="distribution1D"></svg>
                 </div>
             </div>
-            <!-- End AC Heatmap-->
 
-            <!-- BC Heatmap -->
             <div class="row">
-                <div class="col-md-12">
-                    <svg id="heatmapBC"></svg>
+                <div class="col-md-6 col-md-offset-3">
+                    <h4 style="visibility: hidden">Peak Glyphs</h4>
                 </div>
             </div>
-            <!-- End BC Heatmap-->
+
+            <div class="row">
+                <div class="col-md-3">
+                    <svg id="peaks1D"></svg>
+                </div>
+            </div>
 
         </div>
-        <!-- End 2D Column-->
-
-        <!-- 3D column-->
-        <div class="col-md-4">
-
-            <!-- AB 3D Plot -->
-            <div class="row">
-                <div class="col-md-12">
-                    <div id="plotyly3dAB"></div>
-                </div>
-            </div>
-            <!-- End 3D Plot-->
-
-            <!-- AC 3D Plot -->
-            <div class="row">
-                <div class="col-md-12">
-                    <div id="plotyly3dAC"></div>
-                </div>
-            </div>
-            <!-- End 3D Plot-->
-
-            <!-- BC 3D Plot -->
-            <div class="row">
-                <div class="col-md-12">
-                    <div id="plotyly3dBC"></div>
-                </div>
-            </div>
-            <!-- End 3D Plot-->
-
-        </div>
-        <!-- End 3D Column-->
-
     </div>
-    <!-- End Body-->
+    
+    <div class="row">
+        <div class="col-md-4">
+            <svg id="heatmapAB"></svg>
+        </div>
+        <div class="col-md-4">
+            <svg id="heatmapAC"></svg>
+        </div>
+        <div class="col-md-4">
+            <svg id="heatmapBC"></svg>
+        </div>
+    </div>
 
+    <div class="row">
+        <div class="col-md-4"> 
+            <div id="plotyly3dAB" style="width:100%;height:60%"></div>
+        </div>
+        <div class="col-md-4">
+            <div id="plotyly3dAC" style="width:100%;height:60%"></div>
+        </div>
+        <div class="col-md-4">
+            <div id="plotyly3dBC" style="width:100%;height:60%"></div>
+        </div>
+    </div>
 </div>
-<!-- End Bootstrap Container-->
-
 
 </body>
 </html>

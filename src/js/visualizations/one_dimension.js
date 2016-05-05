@@ -29,7 +29,7 @@ Application.oneDV = Application.oneDV || {};
         initialize : function(main) {
 
             // Width and height of the line chart
-            lineGraphWidth = (main.node().parentNode.clientWidth - 3 * Application.margin) * 5/6;
+            lineGraphWidth = (main.node().parentNode.clientWidth - 3 * Application.margin);
             lineGraphHeight = Application.main_height / 1.5;
 
             xScale = d3.scale.linear().range([0, lineGraphWidth]);
@@ -40,12 +40,12 @@ Application.oneDV = Application.oneDV || {};
 
             heatMap = d3.select("#distribution1D")
                 .attr("width", lineGraphWidth)
-                .attr("height", lineGraphHeight / 2);
+                .attr("height", lineGraphHeight / 1.5);
 
             // locations of states
             projectionOneD_peaks = d3.select('#peaks1D')
                 .attr("width", lineGraphWidth )
-                .attr("height", Application.main_height / 3);
+                .attr("height", Application.main_height / 2);
                 // .attr("transform", "translate(" + (lineGraphWidth + Application.shiftX*2) + ", 0)");
 //                    + "," + Application.shiftY + ")");
         },
@@ -53,14 +53,10 @@ Application.oneDV = Application.oneDV || {};
         // Accessor to obtain the 1D projection
         getProjection: function() { return projectionOneD },
 
-        // Accessor to obtain the 1D peaks
-        getPeaks: function(){ return projectionOneD_peaks },
-
         // draw x/y-axis
         drawAxis: function(xMax, yMax) {
 
             var chartHeight = lineGraphHeight;
-            console.log(chartHeight/2);
 
             xScale.domain([0, xMax]);
             yScale.domain([0, yMax]);
@@ -237,7 +233,8 @@ Application.oneDV = Application.oneDV || {};
                     }
                 });
         },
-        outerline: function(yPos, width, height, color) {
+
+        outerLine: function(yPos, width, height, color) {
 
             var textOffset = heatMap.select("#protein-label").node().clientWidth;
 
@@ -352,7 +349,7 @@ Application.oneDV = Application.oneDV || {};
                 maxHeight =   projectionOneD_peaks.attr('height');
 
             // width and height of the peaks
-            var length = maxWidth / 7.5;
+            var length = maxWidth / 6;
             var height = length / Application.protein_type;
 
             // iterative x and y starting positions
@@ -429,7 +426,7 @@ Application.oneDV = Application.oneDV || {};
 
             /* Initialize tooltip */
             var tip = d3.tip().attr('class', 'd3-tip').html(function(d) {
-                var tooltip = "<span style='color:red'>Count:</span>" + d.count + "<br\><br\><span style='color:red'>Value: </span>" + d.value;
+                var tooltip = "<span style='color:red'>Count: </span>" + d.count + "<br\><br\><span style='color:red'>Value: </span>" + d.value;
                 return tooltip;
             });
             // attach the tooltip listener to the peaks element
@@ -457,22 +454,24 @@ Application.oneDV = Application.oneDV || {};
             var Pc_t20 = Application.data["Pc"];
             var Pabc_t20 = Application.data["Pabc"];
 
+            var heatmapElementWidth = lineGraphWidth/(xMax_oneD+Application.margin);
+
             var deltaY = (lineGraphHeight/2)/3 - Application.shiftY/2;
             this.drawHeatMaps(Pa_t20, xMax_oneD, yMax_oneD, headerRow_oneD[0], headerRow_oneD[Application.currentTime+1],
-                Application.shiftY*1.5, lineGraphWidth/(xMax_oneD*1.25), deltaY * 0.8,  0, Pabc_t20, probMax3D, xMaxP,
+                Application.shiftY*2, heatmapElementWidth, deltaY * 0.9,  0, Pabc_t20, probMax3D, xMaxP,
                 Application.shiftX*2, Application.main_width*2/5 - Application.shiftX*5, "A");
 
             this.drawHeatMaps(Pb_t20, xMax_oneD, yMax_oneD, headerRow_oneD[0], headerRow_oneD[Application.currentTime+1],
-                Application.shiftY*1.5 + deltaY, lineGraphWidth/(xMax_oneD*1.25), deltaY * 0.8, 1, Pabc_t20, probMax3D,
+                Application.shiftY*2 + deltaY, heatmapElementWidth, deltaY * 0.9, 1, Pabc_t20, probMax3D,
                 xMaxP, Application.shiftX*2, Application.main_width*2/5 - Application.shiftX*5, "B");
 
             this.drawHeatMaps(Pc_t20, xMax_oneD, yMax_oneD, headerRow_oneD[0], headerRow_oneD[Application.currentTime+1],
-                Application.shiftY*1.5 + deltaY*2, lineGraphWidth/(xMax_oneD*1.25), deltaY * 0.8, 2, Pabc_t20, probMax3D,
+                Application.shiftY*2 + deltaY*2, heatmapElementWidth, deltaY * 0.9, 2, Pabc_t20, probMax3D,
                 xMaxP, Application.shiftX*2, Application.main_width*2/5 - Application.shiftX*5, "C");
 
-            this.outerline(Application.shiftY*1.5, lineGraphWidth*(xMaxP[0]+1)/(xMax_oneD*1.25), deltaY * 0.8, d3.hsl(162, 0.71, 0.36));
-            this.outerline(Application.shiftY*1.5 + deltaY , lineGraphWidth*(xMaxP[1]+1)/(xMax_oneD*1.25), deltaY * 0.8 , d3.hsl(26, 0.98, 0.43));
-            this.outerline(Application.shiftY*1.5 + deltaY * 2 , lineGraphWidth*(xMaxP[2]+1)/(xMax_oneD*1.25), deltaY * 0.8, d3.hsl(244, 0.31, 0.57));
+            this.outerLine(Application.shiftY*2, heatmapElementWidth*(xMaxP[0]+1) , deltaY * 0.9, d3.hsl(162, 0.71, 0.36));
+            this.outerLine(Application.shiftY*2 + deltaY , heatmapElementWidth*(xMaxP[1]+1), deltaY * 0.9 , d3.hsl(26, 0.98, 0.43));
+            this.outerLine(Application.shiftY*2 + deltaY * 2 , heatmapElementWidth*(xMaxP[2]+1), deltaY * 0.9, d3.hsl(244, 0.31, 0.57));
         }
 
     };
