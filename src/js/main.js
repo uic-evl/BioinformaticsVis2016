@@ -24,6 +24,7 @@ var Application = Application ||  {};
     Application.clickedPcIndex = -1;
 
     Application.data = {};
+    Application.timeSlider = null;
 
     // Control Panel Variables
     Application.show_projectionOneD = true;
@@ -39,7 +40,6 @@ var Application = Application ||  {};
     Application.show_detailTwoD = false;
     Application.show_qualitative = false;
     Application.show_animation = false;
-
 })();
 
 /************************************************************************************/
@@ -99,9 +99,11 @@ function start() {
             t: 20
         }
     };
-    // d3.select('#plotyly3dAB').attr("height", Application.main_height - Application.margin * 2);
-    // d3.select('#plotyly3dAC').attr("height", Application.main_height - Application.margin * 2);
-    // d3.select('#plotyly3dBC').attr("height", Application.main_height - Application.margin * 2);
+
+    var AB3d = document.getElementById('plotyly3dAB');
+    var AC3d = document.getElementById('plotyly3dAC');
+    var BC3d = document.getElementById('plotyly3dBC');
+
 
     /************************************************************************************/
 
@@ -162,8 +164,6 @@ function start() {
             }, []);
 
         Application.data["Pabc"] = Pabc_t20;
-
-
 
         var headerRow_oneD = Object.keys(Pa_t20[0]);  // get keys from the first row
         var headerRow_twoD = Object.keys(Pab_t20[0]);  // get keys from the first row
@@ -247,18 +247,28 @@ function start() {
             var plotlyPac = Application.utils.convert4plotly(Pac_t20, Pa_t20.length, Pc_t20.length, 2);
             var plotlyPbc = Application.utils.convert4plotly(Pbc_t20, Pb_t20.length, Pc_t20.length, 2);
 
-            Plotly.newPlot('plotyly3dAB', [plotlyPab], layout);
-            Plotly.newPlot('plotyly3dAC', [plotlyPac], layout);
-            Plotly.newPlot('plotyly3dBC', [plotlyPbc, layout]);
+            /* update the data and redraw */
+            AB3d.data = [plotlyPab];
+            Plotly.redraw('plotyly3dAB', AB3d.layout);
+
+            AB3d.data = [plotlyPac];
+            Plotly.redraw('plotyly3dAC', AC3d.layout);
+
+            AB3d.data = [plotlyPbc];
+            Plotly.redraw('plotyly3dBC', BC3d.layout);
         }
 
-        d3.select('#timeSlider')
-            .call(d3.slider()
-                .axis(d3.svg.axis().ticks(Application.TimeStep))
-                .min(startingTime)
-                .max(Application.TimeStep)
-                .step(1)
-                .on("slideend", brushed));
+        /***** Setup the time slider ****/
+        Application.timeSlider =
+            d3.slider()
+            .axis(d3.svg.axis().ticks(Application.TimeStep))
+            .min(startingTime)
+            .max(Application.TimeStep)
+            .step(1)
+            .on("slideend", brushed);
+
+         d3.select('#timeSlider')
+            .call(Application.timeSlider);
 
         // show the labels
         d3.selectAll('h3').style({visibility: 'visible'});
@@ -304,6 +314,9 @@ function start() {
             if (Application.show_animation) {
                 Application.currentTime = (Application.currentTime+1) % Application.TimeStep;
 
+                // update the timeSlider with the change
+                Application.timeSlider.value(Application.currentTime);
+
                 pAB.update2DHeatMap(Application.currentTime, colorbrewer.Set1["4"]);
                 pBC.update2DHeatMap(Application.currentTime, colorbrewer.Set1["4"]);
                 pAC.update2DHeatMap(Application.currentTime, colorbrewer.Set1["4"]);
@@ -312,11 +325,18 @@ function start() {
                 var plotlyPac = Application.utils.convert4plotly(Pac_t20, Pa_t20.length, Pc_t20.length, 2);
                 var plotlyPbc = Application.utils.convert4plotly(Pbc_t20, Pb_t20.length, Pc_t20.length, 2);
 
-                Plotly.newPlot('plotyly3dAB', [plotlyPab], layout);
-                Plotly.newPlot('plotyly3dAC', [plotlyPac], layout);
-                Plotly.newPlot('plotyly3dBC', [plotlyPbc], layout);
+                /* update the data and redraw */
+                AB3d.data = [plotlyPab];
+                Plotly.redraw('plotyly3dAB', AB3d.layout);
+
+                AB3d.data = [plotlyPac];
+                Plotly.redraw('plotyly3dAC', AC3d.layout);
+
+                AB3d.data = [plotlyPbc];
+                Plotly.redraw('plotyly3dBC', BC3d.layout);
             }
         }
+        var id = setInterval(frame, 100); // draw every 100ms
 
         /************************ Initial Render *********************************/
         Application.oneDV.drawAxis(xMax_oneD, yMax_oneD);  // draw X/Y-axis
@@ -331,9 +351,9 @@ function start() {
 
         /************* 3D Surface Plots ********************************************/
 
-        Plotly.newPlot('plotyly3dAB', [plotlyPab], layout);
-        Plotly.newPlot('plotyly3dAC', [plotlyPac], layout);
-        Plotly.newPlot('plotyly3dBC', [plotlyPbc], layout);
+        Plotly.newPlot(AB3d, [plotlyPab], layout, {displayModeBar: false});
+        Plotly.newPlot(AC3d, [plotlyPac], layout, {displayModeBar: false});
+        Plotly.newPlot(BC3d, [plotlyPbc], layout, {displayModeBar: false});
 
     }  // end - loadAll()
 }
