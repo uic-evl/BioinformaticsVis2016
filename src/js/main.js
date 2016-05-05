@@ -356,13 +356,16 @@ function start() {
 
         /************* 3D Surface Plots ********************************************/
 
-        layout.scene = {xaxis: {title: "ProteinB"}, yaxis: {title: "ProteinA"}, zaxis: {title: "Prob."}};
+        layout.scene = {xaxis: {title: "ProteinB"}, yaxis: {title: "ProteinA"}, zaxis: {title: "Prob."},
+            camera: { eye: { x: -1.25, y: -1.25, z: 2 } } };
         Plotly.newPlot(AB3d, [plotlyPab], layout, {displayModeBar: false});
 
-        layout.scene = {xaxis: {title: "ProteinB"}, yaxis: {title: "ProteinC"}, zaxis: {title: "Prob."}};
+        layout.scene = {xaxis: {title: "ProteinC"}, yaxis: {title: "ProteinA"}, zaxis: {title: "Prob."},
+            camera: { eye: { x: -1.25, y: -1.25, z: 2 } }};
         Plotly.newPlot(AC3d, [plotlyPac], layout, {displayModeBar: false});
 
-        layout.scene = {xaxis: {title: "ProteinA"}, yaxis: {title: "ProteinC"}, zaxis: {title: "Prob."}};
+        layout.scene = {xaxis: {title: "ProteinC"}, yaxis: {title: "ProteinB"}, zaxis: {title: "Prob."},
+            camera: { eye: { x: -1.25, y: -1.25, z: 2 } }};
         Plotly.newPlot(BC3d, [plotlyPbc], layout, {displayModeBar: false});
 
     }  // end - loadAll()
