@@ -40,7 +40,7 @@ Application.oneDV = Application.oneDV || {};
 
             heatMap = d3.select("#distribution1D")
                 .attr("width", lineGraphWidth)
-                .attr("height", lineGraphHeight / 1.5);
+                .attr("height", lineGraphHeight / 2);
 
             // locations of states
             projectionOneD_peaks = d3.select('#peaks1D')
@@ -75,7 +75,7 @@ Application.oneDV = Application.oneDV || {};
                 .call(xAxis)
                 .append("text")
                 .style("text-anchor", "middle")
-                .attr("transform", "translate(" + (lineGraphWidth/2) + "," + Application.shiftY*2 + ")")
+                .attr("transform", "translate(" + (lineGraphWidth/2) + "," + Application.shiftY *1.5 + ")")
                 .attr("class", "label")
                 .text(xAxisLabelText);
 
@@ -458,20 +458,20 @@ Application.oneDV = Application.oneDV || {};
 
             var deltaY = (lineGraphHeight/2)/3 - Application.shiftY/2;
             this.drawHeatMaps(Pa_t20, xMax_oneD, yMax_oneD, headerRow_oneD[0], headerRow_oneD[Application.currentTime+1],
-                Application.shiftY*2, heatmapElementWidth, deltaY * 0.9,  0, Pabc_t20, probMax3D, xMaxP,
-                Application.shiftX*2, Application.main_width*2/5 - Application.shiftX*5, "A");
+                Application.shiftY, heatmapElementWidth, deltaY * 0.9,  0, Pabc_t20, probMax3D, xMaxP,
+                Application.shiftX, Application.main_width*2/5 - Application.shiftX*5, "A");
 
             this.drawHeatMaps(Pb_t20, xMax_oneD, yMax_oneD, headerRow_oneD[0], headerRow_oneD[Application.currentTime+1],
-                Application.shiftY*2 + deltaY, heatmapElementWidth, deltaY * 0.9, 1, Pabc_t20, probMax3D,
+                Application.shiftY + deltaY, heatmapElementWidth, deltaY * 0.9, 1, Pabc_t20, probMax3D,
                 xMaxP, Application.shiftX*2, Application.main_width*2/5 - Application.shiftX*5, "B");
 
             this.drawHeatMaps(Pc_t20, xMax_oneD, yMax_oneD, headerRow_oneD[0], headerRow_oneD[Application.currentTime+1],
-                Application.shiftY*2 + deltaY*2, heatmapElementWidth, deltaY * 0.9, 2, Pabc_t20, probMax3D,
+                Application.shiftY + deltaY*2, heatmapElementWidth, deltaY * 0.9, 2, Pabc_t20, probMax3D,
                 xMaxP, Application.shiftX*2, Application.main_width*2/5 - Application.shiftX*5, "C");
 
-            this.outerLine(Application.shiftY*2, heatmapElementWidth*(xMaxP[0]+1) , deltaY * 0.9, d3.hsl(162, 0.71, 0.36));
-            this.outerLine(Application.shiftY*2 + deltaY , heatmapElementWidth*(xMaxP[1]+1), deltaY * 0.9 , d3.hsl(26, 0.98, 0.43));
-            this.outerLine(Application.shiftY*2 + deltaY * 2 , heatmapElementWidth*(xMaxP[2]+1), deltaY * 0.9, d3.hsl(244, 0.31, 0.57));
+            this.outerLine(Application.shiftY, heatmapElementWidth*(xMaxP[0]+1) , deltaY * 0.9, d3.hsl(162, 0.71, 0.36));
+            this.outerLine(Application.shiftY + deltaY , heatmapElementWidth*(xMaxP[1]+1), deltaY * 0.9 , d3.hsl(26, 0.98, 0.43));
+            this.outerLine(Application.shiftY + deltaY * 2 , heatmapElementWidth*(xMaxP[2]+1), deltaY * 0.9, d3.hsl(244, 0.31, 0.57));
         }
 
     };
