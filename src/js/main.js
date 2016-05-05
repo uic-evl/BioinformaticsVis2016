@@ -285,8 +285,8 @@ function start() {
                     Application.show_projectionTwoD_time = !Application.show_projectionTwoD_time;
 
                     pAB.showCurves("Pab");
-                    pBC.showCurves("Pac");
-                    pAC.showCurves("Pbc");
+                    pBC.showCurves("Pbc");
+                    pAC.showCurves("Pac");
 
                 }
                 else if(this.name == 'currentTime')
@@ -346,8 +346,8 @@ function start() {
         Application.oneDV.drawPeaks(xMaxP, probMax3D);
 
         pAB.draw2DHeatMap("Pab" ,probMax2D, Application.currentTime);
-        pBC.draw2DHeatMap("Pac", probMax2D, Application.currentTime);
-        pAC.draw2DHeatMap("Pbc", probMax2D, Application.currentTime);
+        pAC.draw2DHeatMap("Pac", probMax2D, Application.currentTime);
+        pBC.draw2DHeatMap("Pbc", probMax2D, Application.currentTime);
 
         /************* 3D Surface Plots ********************************************/
 
