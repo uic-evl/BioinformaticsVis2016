@@ -289,6 +289,7 @@ function start() {
 
                 if(this.name == 'timeCurves')
                 {
+                    // console.log(this.name);
                     // flip the state
                     Application.show_projectionTwoD_time = !Application.show_projectionTwoD_time;
 
